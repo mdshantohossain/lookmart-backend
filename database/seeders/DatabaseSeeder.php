@@ -5,11 +5,9 @@ namespace Database\Seeders;
 use App\Models\Admin\Category;
 use App\Models\Admin\SubCategory;
 use App\Models\OtherImage;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Admin\Product;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -20,6 +18,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(ProductPolicySeeder::class);
+        $this->call(RolePermissionsSeeder::class);
 
         $categories = [
             'Electroncs' => [
@@ -120,12 +119,5 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
-
-        User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('password'),
-            'role' => 'admin'
-        ]);
     }
 }

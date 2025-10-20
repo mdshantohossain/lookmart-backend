@@ -9,9 +9,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="">All Sub Categories</h3>
+                        @can('sub-category create')
                         <a href="{{ route('sub-categories.create') }}" class="btn btn-sm btn-primary waves-effect waves-light">
                             Add Sub Category
                         </a>
+                        @endcan
                     </div>
                     <div class="table-responsive">
                         <table id="datatable"  class="table align-middle table-nowrap mb-0">
@@ -20,9 +22,10 @@
                                 <th class="align-middle">Sl.</th>
                                 <th class="align-middle">Category Name</th>
                                 <th class="align-middle">Name</th>
-                                <th class="align-middle">Total Product</th>
                                 <th class="align-middle">Status</th>
+                                @canany(['sub-category edit', 'sub-category destroy'])
                                 <th class="align-middle">Action</th>
+                                @endcanany
                             </tr>
                             </thead>
                             <tbody>
@@ -31,25 +34,30 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $subCategory->category->name }}</td>
                                         <td>{{ $subCategory->name }}</td>
-                                        <td>{{ count($subCategory->products) }}</td>
                                         <td>
-                                            <span class="badge badge-pill {{ $subCategory->status === 1 ? 'badge-soft-success' : 'badge-soft-secondary' }}  font-size-11">{{ $subCategory->status === 1 ? 'Published': 'Unpublished' }}</span>
+                                            {!! getStatus($subCategory->status, 'catalog') !!}
                                         </td>
+                                        @canany(['sub-category edit', 'sub-category destroy'])
                                         <td>
                                             <div>
+                                                @can('sub-category edit')
                                                 <a href="{{ route('sub-categories.edit', $subCategory->slug) }}" class="btn btn-sm btn-primary" >
                                                     <i class="fa fa-edit"></i>
                                                 </a>
+                                                @endcan
 
-                                                <a href="#" class="btn btn-sm btn-danger" onclick='confirmDelete(event, "deleteForm-{{ $subCategory->slug }}")'>
-                                                    <i class="fa fa-trash"></i>
-                                                </a>
-                                                <form action="{{ route('sub-categories.destroy', $subCategory->slug) }}" method="POST" id="deleteForm-{{ $subCategory->slug }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
+                                                @can('sub-category destroy')
+                                                    <a href="#" class="btn btn-sm btn-danger" onclick='confirmDelete(event, "deleteForm-{{ $subCategory->slug }}")'>
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+                                                    <form action="{{ route('sub-categories.destroy', $subCategory->slug) }}" method="POST" id="deleteForm-{{ $subCategory->slug }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                    </form>
+                                               @endcan
                                             </div>
                                         </td>
+                                        @endcanany
                                     </tr>
                                 @endforeach
                             </tbody>

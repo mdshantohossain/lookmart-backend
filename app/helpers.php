@@ -7,6 +7,57 @@ use App\Models\Admin\Product;
 use Illuminate\Support\Str;
 
 
+use Illuminate\Support\Facades\Auth;
+
+// check authorization
+if(!function_exists('isAuthorized')) {
+    function isAuthorized(string $permission): void {
+      if(! auth()?->user()->can($permission)) {
+          abort(403);
+      }
+    }
+}
+
+// status generate
+if (!function_exists('getStatus')) {
+    /**
+     * Generate HTML badge for status
+     *
+     * @param int $status
+     * @param string $type  'user' or 'product'
+     * @return string
+     */
+    function getStatus(int $status, string $type = 'user'): string
+    {
+        $statuses = [
+            'activity' => [
+                0 => ['label' => 'Offline', 'class' => 'badge-soft-secondary'],
+                1 => ['label' => 'Online', 'class' => 'badge-soft-success'],
+            ],
+            'catalog' => [
+                0 => ['label' => 'Unpublished', 'class' => 'badge-soft-secondary'],
+                1 => ['label' => 'Published', 'class' => 'badge-soft-success'],
+            ],
+            'user' => [
+                0 => ['label' => 'Inactive', 'class' => 'badge-soft-secondary'],
+                1 => ['label' => 'Active', 'class' => 'badge-soft-success'],
+                2 => ['label' => 'Blocked', 'class' => 'badge-soft-danger']
+            ],
+            'order' => [
+                0 => ['label' => 'Pending', 'class' => 'badge-soft-warning'],
+                1 => ['label' => 'Processing', 'class' => 'badge-soft-info'],
+                2 => ['label' => 'Delivered', 'class' => 'badge-soft-success'],
+                3 => ['label' => 'Canceled', 'class' => 'badge-soft-danger'],
+                4 => ['label' => 'Returned', 'class' => 'badge-soft-secondary'],
+            ],
+        ];
+
+        $data = $statuses[$type][$status] ?? ['label' => 'Unknown', 'class' => 'badge-soft-dark'];
+
+        return "<span class='badge badge-pill {$data['class']} font-size-11'>{$data['label']}</span>";
+    }
+}
+
 if(!function_exists('removeImage')) {
     function removeImage(string $url)
     {
@@ -43,7 +94,6 @@ if(!function_exists('generateUniqueSlug')) {
         return $slug;
     }
 }
-
 
 if(! function_exists('truncateString')) {
     function truncateString($string, $length)

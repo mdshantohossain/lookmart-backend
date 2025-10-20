@@ -9,9 +9,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="">All Categories</h3>
+                        @can('category create')
                         <a href="{{ route('categories.create') }}" class="btn btn-sm btn-primary waves-effect waves-light">
                             Add Category
                         </a>
+                        @endcan
                     </div>
 
                     <div class="table-responsive">
@@ -23,7 +25,9 @@
                                 <th class="align-middle">image</th>
                                 <th class="align-middle">Total Sub category</th>
                                 <th class="align-middle">Status</th>
+                                @canany(['category edit', 'category destroy'])
                                 <th class="align-middle">Action</th>
+                                @endcanany
                             </tr>
                             </thead>
                             <tbody>
@@ -47,8 +51,9 @@
                                         {{ count($category->subCategories) }}
                                     </td>
                                     <td>
-                                        <span class="badge badge-pill {{ $category->status === 1 ? 'badge-soft-success' : 'badge-soft-secondary' }}  font-size-11">{{ $category->status === 1 ? 'Published': 'Unpublished' }}</span>
+                                        {!! getStatus($category->status, 'catalog') !!}
                                     </td>
+                                    @canany(['category edit', 'category destroy'])
                                     <td>
                                         <div>
                                             <a href="{{ route('categories.edit', $category->slug) }}" class="btn btn-sm btn-primary" >
@@ -64,6 +69,7 @@
                                             </form>
                                         </div>
                                     </td>
+                                    @endcanany
                                 </tr>
                             @endforeach
 

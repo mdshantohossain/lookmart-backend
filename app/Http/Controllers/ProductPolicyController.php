@@ -18,11 +18,16 @@ class ProductPolicyController extends Controller
 
     public function create(ProductPolicy $productPolicy): View
     {
+        // check permission of current user
+        isAuthorized('product policy create');
+
         return view('admin.product-policy.create', compact('productPolicy'));
     }
 
     public function store(ProductPolicyRequest $request, ProductPolicyService $productPolicyService): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('product policy create');
         $productPolicy = $productPolicyService->updateOrCreate($request->all());
 
         if(!$productPolicy) {
@@ -34,11 +39,16 @@ class ProductPolicyController extends Controller
 
     public function edit(ProductPolicy $productPolicy): View
     {
+        // check permission of current user
+        isAuthorized('product policy edit');
         return view('admin.product-policy.edit', compact('productPolicy'));
     }
 
     public function update(ProductPolicyRequest $request, ProductPolicy $productPolicy, ProductPolicyService $productPolicyService): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('product policy edit');
+
         $productPolicy = $productPolicyService->updateOrCreate($request->all(), $productPolicy);
 
         if(!$productPolicy) {
@@ -50,6 +60,9 @@ class ProductPolicyController extends Controller
 
     public function destroy(ProductPolicy $productPolicy): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('product policy destroy');
+
         if(file_exists($productPolicy->image)) {
             unlink($productPolicy->image);
         }

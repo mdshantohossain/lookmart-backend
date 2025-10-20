@@ -45,6 +45,9 @@
     .custom-border{
         border-color: #cad1d9 !important;
     }
+    .bg-custom-checkbox {
+        background-color: #edf3fb;
+    }
 </style>
 
 @stack('links')
