@@ -15,11 +15,6 @@ class AdminAuthenticatedMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-
-        if (auth()->check() && auth()->user()->role !== 'user') {
-            return $next($request);
-        }
-
-        abort(403);
+        return $next($request);
     }
 }

@@ -20,6 +20,9 @@ class SubCategoryController extends Controller
 
     public function create(): View
     {
+        // check permission of current user
+        isAuthorized('sub-category create');
+
         return view('admin.sub-category.create', [
             'categories' => Category::where('status', 1)->get()
         ]);
@@ -27,6 +30,9 @@ class SubCategoryController extends Controller
 
     public function store(SubCategoryRequest $request, SubCategoryService $subCategoryService): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('sub-category create');
+
         $subCategory = $subCategoryService->updateOrCreate($request->validated());
 
         if (!$subCategory) return back()->with('error', 'Sub category not created');
@@ -36,6 +42,9 @@ class SubCategoryController extends Controller
 
     public function edit(SubCategory $subCategory): View
     {
+        // check permission of current user
+        isAuthorized('sub-category edit');
+
         return view('admin.sub-category.edit', [
             'subCategory' => $subCategory,
             'categories' => Category::where('status', 1)->get()
@@ -44,6 +53,9 @@ class SubCategoryController extends Controller
 
     public function  update(SubCategoryRequest $request, SubCategory $subCategory, SubCategoryService $subCategoryService)
     {
+        // check permission of current user
+        isAuthorized('sub-category edit');
+
         $subCategory = $subCategoryService->updateOrCreate($request->validated(), $subCategory);
 
         if(!$subCategory) return back()->with('error', 'Sub category not created');
@@ -54,6 +66,8 @@ class SubCategoryController extends Controller
 
     public function destroy(SubCategory $subCategory): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('sub-category destroy');
         try {
             $subCategory->delete();
 

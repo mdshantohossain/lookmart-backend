@@ -589,8 +589,6 @@
 
 @endpush
 
-
-
 {{--const variantMap = {}; // color -> { image, sizes: { size: variant } }--}}
 
 {{--product.variants.forEach(variant => {--}}

@@ -1,0 +1,79 @@
+@extends('admin.layouts.master')
+
+@section('title', 'Permission create')
+
+@section('body')
+    <div class="row">
+        <div class="col-xl-8 mx-auto ">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>Permission create form</h3>
+                        <a href="{{ route('permissions.index') }}" class="btn btn-sm btn-secondary waves-effect waves-light btn-sm">
+                            Back
+                        </a>
+                    </div>
+                    <form method="POST" action="{{ route('permissions.store') }}">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="formrow-firstname-input" class="form-label">Name<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" value="{{ old('name') }}" name="name" placeholder="Enter permission name" />
+                            @error('name')
+                            <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <button type="submit" class="btn btn-primary w-md">Create</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- end card body -->
+            </div>
+            <!-- end card -->
+        </div>
+        <!-- end col -->
+    </div>
+@endsection
+
+
+@push('scripts')
+    <script>
+        $('.image').on('change', (event) => {
+            const file = event.target.files[0];
+
+            const imageContainer = $('.category-image-preview');
+            imageContainer.empty();
+
+            const render = new FileReader();
+            render.onload = (e) => {
+                const image = `<div class="position-relative d-inline-block">
+                    <img src="${e.target.result}"
+                         class="img-thumbnail rounded-2"
+                         height="120"
+                         width="120"
+                         loading="lazy"
+                         alt="${e.target.result}"
+                    />
+<i data-img-url="${e.target.result}" class="position-absolute top-0 end-0 remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger cursor-pointer"
+aria-hidden="true"
+style="cursor: pointer"
+></i>
+                </div>`;
+
+                imageContainer.html(image);
+            }
+            if(file) render.readAsDataURL(file);
+        });
+
+        // Remove Images
+        $(document).on('click', '.remove-image', function () {
+            // Remove preview + hidden input
+            $(this).closest('div').remove();
+            $('.image').val('').trigger('change');
+        });
+    </script>
+@endpush
+
+
+

@@ -19,28 +19,35 @@ use function React\Promise\all;
 
 class ProductController extends Controller
 {
-
     public function getAllProducts(): JsonResponse
     {
         $products = Product::where('status', 1)->take(10)->get();
         return response()->json($products);
     }
+
     public function index(): View
     {
         return view('admin.product.index', [
             'products' => Product::with('category')->latest()->take(20)->get()
         ]);
     }
+
     public function create(): View
     {
+        // check permission of current user
+        isAuthorized('product create');
+
         return view('admin.product.create', [
             'categories' => Category::where('status',  1)->get(),
             'subCategories' => SubCategory::where('status',  1)->get(),
             ]);
     }
+
     public function store(Request $request, ProductService $productService)
     {
         return $request->all();
+        // check permission of current user
+        isAuthorized('product create');
         $product = $productService->create($request->all());
 
         if (!$product) {
@@ -49,23 +56,36 @@ class ProductController extends Controller
 
         return  redirect('/products')->with('success', 'Product created successfully');
     }
+
     public function show(Product $product): View
     {
+        // check permission of current user
+        isAuthorized('product show');
+
         $product->load(['category', 'subCategory', 'otherImages']);
+
         return view('admin.product.detail', [
             'product' => $product
         ]);
     }
+
     public function edit(Product $product): View
     {
+        // check permission of current user
+        isAuthorized('product edit');
+
         return view('admin.product.edit', [
             'categories' => Category::where('status',  1)->get(),
             'subCategories' => SubCategory::where('status',  1)->get(),
             'product' => $product
         ]);
     }
+
     public function update(ProductUpdateRequest $request, Product $product)
     {
+        // check permission of current user
+        isAuthorized('product edit');
+
         try {
             $inputs = $request->only([
                 'category_id',
@@ -113,8 +133,12 @@ class ProductController extends Controller
             return redirect()->back()->with('error', $exception);
         }
     }
+
     public function destroy(Product $product): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('product destroy');
+
         try {
 
             $otherImages = OtherImage::where('product_id', $product->id)->get();
@@ -143,7 +167,6 @@ class ProductController extends Controller
         ]);
         return response()->json($product);
     }
-
 
     public function getCategoryProducts(string $slug): JsonResponse
     {

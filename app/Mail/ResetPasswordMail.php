@@ -9,16 +9,17 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class CompleteOrderMail extends Mailable
+class ResetPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public array $data;
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(array $data)
     {
-        //
+        $this->data = $data;
     }
 
     /**
@@ -27,7 +28,7 @@ class CompleteOrderMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Complete Order Mail',
+            subject: 'Reset Password Link',
         );
     }
 
@@ -37,7 +38,7 @@ class CompleteOrderMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.complete-order-email',
+            view: 'emails.reset-password',
         );
     }
 

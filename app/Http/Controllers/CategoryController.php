@@ -16,7 +16,6 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-
     public function getAllCategories()
     {
         $category = Category::where('status', 1)->get();
@@ -72,11 +71,17 @@ class CategoryController extends Controller
 
     public function create(): View
     {
+        // check permission of current user
+        isAuthorized('category create');
+
         return view('admin.category.create');
     }
 
     public function store(CategoryRequest $request, CategoryService $categoryService): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('category create');
+
         try {
             $category = $categoryService->updateOrCreate($request->validated());
 
@@ -91,6 +96,9 @@ class CategoryController extends Controller
 
     public function edit(Category $category): View
     {
+        // check permission of current user
+        isAuthorized('category edit');
+
         return view('admin.category.edit', [
             'category' => $category
         ]);
@@ -98,6 +106,9 @@ class CategoryController extends Controller
 
     public function update(CategoryRequest $request, Category $category, CategoryService $categoryService): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('category edit');
+
         try {
            $category = $categoryService->updateOrCreate($request->validated(), $category);
 
@@ -110,6 +121,9 @@ class CategoryController extends Controller
     }
     public function destroy(Category $category): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('category destroy');
+
         try {
             $category->delete();
 

@@ -8,4 +8,5 @@ return [
     Barryvdh\Debugbar\ServiceProvider::class,
     Gloudemans\Shoppingcart\ShoppingcartServiceProvider::class,
     Barryvdh\Debugbar\ServiceProvider::class,
+    Spatie\Permission\PermissionServiceProvider::class
 ];

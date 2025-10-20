@@ -16,15 +16,17 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->unique()->nullable();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('google_id')->nullable()->unique();
             $table->string('facebook_id')->nullable()->unique();
             $table->string('password')->nullable();
             $table->string('role')->default('user');
-            $table->text('identity')->nullable();
-            $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
+            $table->tinyInteger('status')->default(1)->comment('0=inactive, 1=active, 2=blocked');
+            $table->tinyInteger('is_active')->default(0)->comment('0=offline, 1=online');
+            $table->text('identity')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
         });
 

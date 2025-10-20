@@ -17,7 +17,6 @@ class OrderController extends Controller
 {
     public function index()
     {
-//        return Order::with('user')->get();
         return view('admin.order.index', [
             'orders' => Order::with('user')->get(),
         ]);
@@ -25,6 +24,9 @@ class OrderController extends Controller
 
     public function store(Request $request, OrderService $orderService, MailService $mailService)
     {
+        // check permission of current user
+        isAuthorized('order destroy');
+
         $user = $orderService->ensureUserExistsAndAuthenticated($request, $mailService);
 
         if ($user->role != 'user') {
@@ -57,19 +59,27 @@ class OrderController extends Controller
     }
 
     public function show(Order $order): View
-    {
+    {// check permission of current user
+        isAuthorized('order show');
+
         $order->load(['user', 'orderDetails', 'orderDetails.product']);
         return view('admin.order.show', compact('order'));
     }
 
     public function edit(Order $order): View
     {
+        // check permission of current user
+        isAuthorized('order edit');
+
         $order->load('user');
         return view('admin.order.edit', compact('order'));
     }
 
     public function update(OrderUpdateRequest $request, Order $order): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('order update');
+
         if ($request->order_status == 0) {
             $order->order_status = 0;
 
@@ -116,12 +126,13 @@ class OrderController extends Controller
         } else {
             return redirect('/order');
         }
-
-
     }
 
     public function destroy(Order $order): RedirectResponse
     {
+        // check permission of current user
+        isAuthorized('order destroy');
+
         try {
             $order->delete();
             return back()->with('success', 'Order deleted successfully');
@@ -132,6 +143,9 @@ class OrderController extends Controller
 
     public function invoice(Order $order): Response
     {
+        // check permission of current user
+        isAuthorized('order invoice download');
+
         $order->load(['user', 'orderDetails','orderDetails.product']);
         $pdf = Pdf::loadView('admin.order.order-invoice', compact('order'));
         return $pdf->download('invoice-'.$order->id.'.pdf');
