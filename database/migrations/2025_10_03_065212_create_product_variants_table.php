@@ -15,23 +15,16 @@ return new class extends Migration
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->string('vid')->nullable()->index();
-            $table->string('sku')->nullable()->index();
-            $table->string('size')->nullable();
+            $table->string('vid')->nullable();
+            $table->string('sku')->nullable();
             $table->string('color')->nullable();
+            $table->string('variant_key')->nullable();
             // Images
-            $table->string('images')->nullable(); // optional extra images
-
+            $table->text('image')->nullable(); // optional extra images
             // Pricing
             $table->decimal('buy_price', 10)->nullable(); // CJ buy price
-            $table->string('suggest_price', 10)->nullable(); // Suggested price
+            $table->string('suggested_price', 10)->nullable(); // Suggested price
             $table->decimal('selling_price', 10)->nullable(); // your custom selling price
-
-            $table->string('weight')->nullable();
-            $table->string('width')->nullable();
-            $table->string('height')->nullable();
-            $table->string('length')->nullable();
             $table->timestamps();
         });
     }

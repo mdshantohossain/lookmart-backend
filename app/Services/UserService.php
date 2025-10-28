@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
     public function updateOrCreate(array $data, ?User $user = null): ?User
     {
+        DB::beginTransaction();
         try {
             $inputs = collect($data)->toArray();
 
@@ -25,8 +27,10 @@ class UserService
 
             $user->syncRoles([$inputs['role']]);
 
+            DB::commit();
             return $user;
         } catch (\Exception $e) {
+            DB::rollBack();
             logger()->error($e->getMessage());
             return null;
         }

@@ -44,4 +44,9 @@ return [
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
         'redirect' => env('FACEBOOK_REDIRECT_URI'),
     ],
+    'aliExpress' => [
+        'app_key'    => env('ALIEXPRESS_APP_KEY'),
+        'app_secret' => env('ALIEXPRESS_APP_SECRET'),
+        'api_url'    => env('ALIEXPRESS_API_URL'),
+    ],
 ];

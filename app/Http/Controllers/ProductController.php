@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use function PHPUnit\Framework\logicalOr;
 use function React\Promise\all;
 
 class ProductController extends Controller
@@ -43,12 +44,12 @@ class ProductController extends Controller
             ]);
     }
 
-    public function store(Request $request, ProductService $productService)
+    public function store(ProductCreateRequest $request, ProductService $productService): RedirectResponse
     {
-        return $request->all();
-        // check permission of current user
+        // check permission of request user
         isAuthorized('product create');
-        $product = $productService->create($request->all());
+
+        $product = $productService->createOrUpdate($request->all());
 
         if (!$product) {
             return back()->with('error', 'Product could not be created.');
@@ -59,7 +60,7 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('product show');
 
         $product->load(['category', 'subCategory', 'otherImages']);
@@ -71,17 +72,17 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('product edit');
 
         return view('admin.product.edit', [
             'categories' => Category::where('status',  1)->get(),
             'subCategories' => SubCategory::where('status',  1)->get(),
-            'product' => $product
+            'product' => $product->load('variants')
         ]);
     }
 
-    public function update(ProductUpdateRequest $request, Product $product)
+    public function update(ProductUpdateRequest $request, Product $product): RedirectResponse
     {
         // check permission of current user
         isAuthorized('product edit');
@@ -136,7 +137,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('product destroy');
 
         try {

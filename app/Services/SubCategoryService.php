@@ -15,6 +15,7 @@ class SubCategoryService
             $inputs = collect($data)->except(['_token', '_method'])->toArray();
 
             $inputs['slug'] = Str::slug($inputs['name']);
+
             DB::commit();
             return $subCategory ? tap($subCategory)->update($inputs) : SubCategory::create($inputs);
         } catch (\Exception $e) {

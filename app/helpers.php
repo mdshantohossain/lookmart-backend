@@ -70,7 +70,7 @@ if(!function_exists('getImageUrl')) {
     {
         $imageName = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
 
-        $image->move($path . '/' , $imageName);
+        $image->move($path, $imageName);
         // Return the URL accessible from browser (via public/storage)
         return asset($path. '/'. $imageName);
     }

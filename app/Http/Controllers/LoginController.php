@@ -28,10 +28,21 @@ class LoginController extends Controller
         if ($user && password_verify($request->password, $user->password)) {
             Auth::login($user);
 
-            if($user->role !== 'user') {
-                return redirect('/')->with('success', 'Your Login is successful');
+            if($user->role === 'user') {
+
+                $token = $user->createToken('login')->plainTextToken;
+
+                return response()->json([
+                    'status' =>  'success',
+                    'message' => 'Login Successful',
+                    'data' => [
+                        'user' => $user,
+                        'token' => $token,
+                    ]
+                ]);
             }
-            return redirect('/')->with('success', 'Your Login is successful');
+
+            return redirect('/')->with('success', 'Login is successful');
         }
 
         return back()->with('credentialError', 'Credentials do not match in our records');

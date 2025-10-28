@@ -11,96 +11,97 @@ use Illuminate\Support\Str;
 
 class ProductService
 {
-    public function create(array $data): ?Product
+    /**
+     * @param array $data
+     * @param Product|null $product
+     * @return Product|null
+     */
+    public function createOrUpdate(array $data, ?Product $product = null): ?Product
     {
         DB::beginTransaction();
         try {
             $inputs = collect($data)->only([
+                'cj_id',
+                'buy_price',
                 'category_id',
                 'sub_category_id',
                 'name',
                 'regular_price',
                 'selling_price',
-                'cj_id',
-                'buy_price',
-                'sku',
                 'discount',
                 'quantity',
+                'sku',
+                'sizes',
                 'short_description',
                 'long_description',
-                'status'
+                'variants_title',
+                'tags',
+                'meta_title',
+                'meta_description',
+                'is_featured',
+                'is_trending',
+                'status',
+                'variant_json',
             ])->toArray();
 
-            $variants = $data['variants'];
             // Handle main image
-            if (!empty($data['cj_id']) && !empty($data['cj_main_image'])) {
-                $inputs['main_image'] = $data['cj_main_image'];
-            } elseif (!empty($data['main_image'])) {
-                // check is image uploaded on previous image
-                if ( gettype($data['main_image']) !== 'string' ) {
-                    $inputs['main_image'] = getImageUrl(
-                        $data['main_image'],
-                        'admin/assets/images/product-images/'
-                    );
-                } else {
-                    $inputs['main_image'] =  $data['main_image'];
+            if (gettype($data['main_image']) !== 'string' ) {
+                $inputs['main_image'] = getImageUrl(
+                    $data['main_image'],
+                    'admin/assets/images/product-images/'
+                );
+            } else {
+                $inputs['main_image'] =  $data['main_image'];
+            }
+
+            // Handle color image
+            if(isset($data['color_images'])) {
+                $colorImages = [];
+
+                foreach ($data['color_images'] as $image) {
+                    $colorImages[] = gettype($image) === 'string' ? $image : getImageUrl($image, 'admin/assets/images/product-color-images/');
                 }
+                $inputs['color_images'] = json_encode($colorImages);
             }
 
             // Generate slug
-            $inputs['slug'] = Str::slug($inputs['name']) . '-' . Str::random(8);
+            $inputs['slug'] = generateUniqueSlug($inputs['name']);
 
             // Create product
             $product = Product::create($inputs);
 
             // Handle other images
-            if (!empty($data['cj_id']) && !empty($data['cj_other_images'])) {
-                foreach ($data['cj_other_images'] as $otherImage) {
+            if ( !empty($data['other_images'])) {
+                foreach($data['other_images'] as $otherImage) {
+                    $image = gettype($otherImage) === 'string' ? $otherImage : getImageUrl($otherImage, 'admin/assets/images/product-other-images/');
                     OtherImage::create([
                         'product_id' => $product->id,
-                        'image'      => $otherImage
+                        'image'      => $image
                     ]);
-                }
-            } elseif (!empty($data['other_images'])) {
-                foreach ($data['other_images'] as $otherImage) {
-                    if(gettype($otherImage) !== 'string') {
-                        OtherImage::create([
-                            'product_id' => $product->id,
-                            'image'      => getImageUrl(
-                                $otherImage,
-                                'admin/assets/images/other-images/'
-                            )
-                        ]);
-                    } else {
-                        OtherImage::create([
-                            'product_id' => $product->id,
-                            'image'      => $otherImage
-                        ]);
-                    }
                 }
             }
 
+            // insert product variants
+            if(isset($data['variants'])) {
+                foreach ($data['variants'] as $variant) {
 
-            foreach ($variants as $variant) {
-
-                ProductVariant::create([
-                    'product_id'      => $product->id,
-                    'cj_variant_id'   => $variant['vid'] ?? null,
-                    'cj_variant_sku'  => $variant['variantSku'] ?? null,
-                    'price'           => $variant['variantSellPrice'] ?? null,
-                    'variant_image'   => $variant['variantImage'] ?? null,
-                    'product_length'  => $variant['variantLength'] ?? null,
-                    'width'           => $variant['variantWidth'] ?? null,
-                    'height'          => $variant['variantHeight'] ?? null,
-                    'weight'          => $variant['variantWeight'] ?? null,
-                    'images'          => json_encode([$variant['variantImage']]),
-                ]);
+                    $image = gettype($variant['image']) !== 'string' ? getImageUrl($variant['image'], 'admin/assets/images/'):  $variant['image'];
+                    ProductVariant::create([
+                        'product_id'      => $product->id,
+                        'vid'   => $variant['vid'] ?? null,
+                        'sku'  => $variant['sku'] ?? null,
+                        'variant_key'  => $variant['variant_key'] ?? null,
+                        'buy_price'           => $variant['buy_price'] ?? null,
+                        'selling_price'           => $variant['selling_price'] ?? null,
+                        'suggested_price'           => $variant['suggestion_sell_price'] ?? null,
+                        'image'   => $image ?? null,
+                    ]);
+                }
             }
 
             DB::commit();
 
             return $product;
-
         } catch (\Exception $exception) {
             logger($exception->getMessage());
             DB::rollBack();

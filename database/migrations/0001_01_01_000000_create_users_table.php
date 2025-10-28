@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('google_id')->nullable()->unique();
             $table->string('facebook_id')->nullable()->unique();
             $table->string('password')->nullable();
-            $table->string('role')->default('user');
+            $table->string('role')->nullable();
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
             $table->tinyInteger('status')->default(1)->comment('0=inactive, 1=active, 2=blocked');
