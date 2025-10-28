@@ -18,14 +18,21 @@ use App\Http\Controllers\ProductPolicyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AliExpressController;
 
 // middleware
 use App\Http\Middleware\AuthenticatedForUserMiddleware;
 use App\Http\Middleware\AdminAuthenticatedMiddleware;
 
-
 // custom login route
 Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+Route::get('/aliexpress/redirect', [AliExpressController::class, 'redirectToAliExpress']);
+Route::get('/aliexpress/callback', [AliExpressController::class, 'handleCallback']);
+Route::get('/aliexpress/refresh', [AliExpressController::class, 'refreshToken']);
+Route::get('/aliexpress/security-token', [AliExpressController::class, 'getSecurityToken']);
+Route::get('/aliexpress/products', [AliExpressController::class, 'getProducts']);
+Route::get('/aliexpress/categories', [AliExpressController::class, 'getCategories']);
 
 // order routes
 Route::post( '/order-store', [OrderController::class, 'store'])->name( 'order.store');

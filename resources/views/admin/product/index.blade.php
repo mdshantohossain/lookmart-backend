@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="">All Products Information</h3>
+                        <h3 class="">All Products</h3>
                         @can('product create')
                             <a href="{{ route('products.create') }}" class="btn btn-sm btn-primary waves-effect waves-light">
                                 Add Product
@@ -26,7 +26,7 @@
                                 <th class="align-middle">Image</th>
                                 <th class="align-middle">Status</th>
                                 @canany(['product destroy', 'product edit', 'product show'])
-                                <th class="align-middle">Action</th>
+                                    <th class="align-middle">Action</th>
                                 @endcanany
                             </tr>
                             </thead>
@@ -37,28 +37,27 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $product->category->name }}</td>
                                     <td>{{ truncateString($product->name, 25) }}</td>
-                                    <td>{{ $product->selling_price }}</td>
+                                    <td>${{ $product->selling_price }}</td>
                                     <td>
-                                        <img src="{{ $product->main_image }}" height="80" width="100" class="rounded-2" alt="" />
+                                        <img src="{{ $product->main_image }}" height="80" width="100" class="rounded-2" alt="{{ $product->name }}" />
                                     </td>
                                     <td>
                                         {!! getStatus($product->status, 'catalog') !!}
                                     </td>
                                     @canany(['product destroy', 'product edit', 'product show'])
-                                    <td>
-                                        <div>
-                                            @can('product edit')
-                                            <a href="{{ route('products.edit', $product->slug) }}" class="btn btn-sm btn-primary" >
-                                                <i class="fa fa-edit"></i>
-                                            </a>
-                                            @endcan
+                                        <td>
+                                            <div>
+                                                @can('product edit')
+                                                    <a href="{{ route('products.edit', $product->slug) }}" class="btn btn-sm btn-primary" >
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                @endcan
 
-                                            @can('product show')
-                                                <a href="{{ route('products.show', $product->slug) }}" class="btn btn-sm btn-success" >
-                                                    <i class="fa fa-book-open"></i>
-                                                </a>
-                                            @endcan
-
+                                                @can('product show')
+                                                    <a href="{{ route('products.show', $product->slug) }}" class="btn btn-sm btn-success" >
+                                                        <i class="fa fa-book-open"></i>
+                                                    </a>
+                                                @endcan
                                                 @can('product destroy')
                                                     <a href="#" class="btn btn-sm btn-danger" onclick='confirmDelete(event, "deleteForm-{{ $product->slug }}")'>
                                                         <i class="fa fa-trash"></i>
@@ -68,8 +67,8 @@
                                                         @method('DELETE')
                                                     </form>
                                                 @endcan
-                                        </div>
-                                    </td>
+                                            </div>
+                                        </td>
                                     @endcanany
                                 </tr>
                             @empty

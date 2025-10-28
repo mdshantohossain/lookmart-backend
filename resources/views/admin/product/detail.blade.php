@@ -48,13 +48,12 @@
                             @endif
                         </div>
 
-                        <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
                         <p><strong>Status:</strong>
                             <span class="badge {{ $product->status ? 'bg-success' : 'bg-secondary' }}">
                             {{ $product->status ? 'Active' : 'Inactive' }}
                         </span>
                         </p>
-
+                        <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
                         <p><strong>Trending:</strong>
                             {!! $product->is_trending ? '<span class="badge bg-warning">Trending</span>' : '—' !!}
                         </p>
@@ -96,7 +95,7 @@
                     <p>{{ $product->short_description ?? 'N/A' }}</p>
 
                     <h5>Long Description</h5>
-                    <div>{!! nl2br(e($product->long_description)) !!}</div>
+                    <div>{!! $product->long_description !!}</div>
                 </div>
 
                 {{-- Policies --}}

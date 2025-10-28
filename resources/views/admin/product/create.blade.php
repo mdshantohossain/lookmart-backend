@@ -14,6 +14,12 @@
                 </div>
 
                 <div class="card-body">
+                    @if($errors->any())
+                        @foreach($errors->all() as $message)
+                            <li class="text-danger">{{ $message }}</li>
+                        @endforeach
+                    @endif
+
                     {{-- 🔎 CJ Product Import --}}
                     <div class="mb-4 p-3 border rounded bg-light">
                         <label for="cj_search" class="form-label fw-bold">Import from CJ</label>
@@ -52,9 +58,9 @@
 
                             <!-- Sub-category -->
                             <div class="col-md-6">
-                                <label for="subCategoryId" class="form-label">Sub-category<span class="text-danger">*</span></label>
+                                <label for="subCategoryId" class="form-label">Sub category</label>
                                 <select name="sub_category_id" id="subCategoryId" class="form-select">
-                                    <option value="">Select sub-category</option>
+                                    <option value="">Select sub category</option>
                                     @foreach($subCategories as $subCategory)
                                         <option value="{{ $subCategory->id }}" {{ $subCategory->id == old('sub_category_id') ? 'selected' : '' }}>
                                             {{ $subCategory->name }}
@@ -76,80 +82,51 @@
                             </div>
 
                             <!-- Pricing -->
-                            <div class="col-md-4">
-                                <label for="regular_price" class="form-label">Original Price</label>
+                            <div class="col-md-3">
+                                <label for="regular_price" class="form-label">Regular Price </label>
                                 <input type="number" step="0.01" class="form-control" id="regular_price" name="regular_price" value="{{ old('regular_price') }}" placeholder="0.00" />
                                 @error('regular_price')
                                 <span id="regular_price_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label for="discount" class="form-label">Discount (%)</label>
+                                <input type="text" class="form-control" id="discount" name="discount" value="{{ old('discount') }}" placeholder="0%" />
+                                <span class="text-danger" id="discountError"></span>
+                                @error('discount')
+                                <span id="discount_error_message" class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-3">
                                 <label for="selling_price" class="form-label">Selling Price<span class="text-danger">*</span></label>
                                 <input type="number" step="0.01" class="form-control" id="selling_price" name="selling_price" value="{{ old('selling_price') }}" placeholder="0.00" />
                                 @error('selling_price')
                                 <span id="selling_price_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
-
-                            <div class="col-md-4">
-                                <label for="discount" class="form-label">Discount (%)</label>
-                                <input type="text" class="form-control" id="discount" name="discount" value="{{ old('discount') }}" placeholder="Enter discount amount" />
-                                <span class="text-danger" id="discountError"></span>
-                                @error('discount')
-                                <span id="discount_error_message" class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div id="suggestionPrice"></div>
-
-                            <!-- Quantity & SKU -->
-                            <div class="col-md-6">
-                                <label for="quantity" class="form-label">Quantity<span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" value="{{ old('quantity') }}" min="1" placeholder="Enter product quantity">
-                                @error('quantity')
-                                <span id="quantity_error_message" class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
+                            <!-- SKU -->
+                            <div class="col-md-3">
                                 <label for="sku" class="form-label">SKU<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="sku" name="sku" value="{{ old('sku') }}" placeholder="Enter unique SKU">
+                                <input type="text" class="form-control" id="sku" name="sku" value="{{ old('sku') }}" placeholder="Enter product unique SKU" />
                                 @error('sku')
                                 <span id="sku_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
 
-                            <!-- Images -->
-                            <div class="col-md-6">
-                                <label for="main_image" class="form-label">Main Image<span class="text-danger">*</span></label>
-                                <input type="file" class="form-control" id="main_image" name="main_image" accept="image/*">
-                                @error('main_image')
-                                <span id="main_image_error_message" class="text-danger">{{ $message }}</span>
-                                @enderror
+                            <div id="suggestionPrice"></div>
 
-                                <div id="main_image_preview_wrapper" class="mt-2">
-                                    <img id="main_image_preview" src="" alt="cj_image" class="mt-2" style="max-width:120px;display:none;" />
-                                </div>
-                            </div>
-
-                            {{--Other images--}}
+                            <!-- Quantity -->
                             <div class="col-md-6">
-                                <label for="other_images" class="form-label">Other Images</label>
-                                <input type="file" class="form-control" id="other_images" name="other_images[]" multiple accept="image/*">
-                                @error('other_images')
-                                <span id="other_image_error_message" class="text-danger">{{ $message }}</span>
-                                @enderror
-                                <div class="other_image_preview"></div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="video" class="form-label">Product Video</label>
-                                <input type="file" class="form-control" id="video" name="video" />
-                                @error('video')
-                                <span id="video" class="text-danger">{{ $message }}</span>
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" value="{{ old('quantity') }}" min="1" placeholder="Enter product quantity" />
+                                @error('quantity')
+                                <span id="quantity_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
 
+                            <!-- Product sizes -->
                             <div class="col-md-6">
                                 <label for="other_images" class="form-label">Product Sizes</label>
                                 <input type="text" class="form-control sizes" id="sizes" name="sizes" placeholder="Enter product sizes" />
@@ -163,14 +140,53 @@
                                 <label for="other_images" class="form-label">Colors</label>
                                 <input type="file" class="form-control" id="colors" name="color_images[]" multiple />
                                 @error('colors')
-                                <span id="colors" class="text-danger">{{ $message }}</span>
+                                <span id="colors_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
-
                                 <div class="color-previews-container d-flex flex-wrap"></div>
                             </div>
 
+                            <!-- Images -->
+                            <div class="col-md-6">
+                                <label for="main_image" class="form-label">Main Image<span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="main_image" name="main_image" accept="image/*">
+                                @error('main_image')
+                                <span id="main_image_error_message" class="text-danger">{{ $message }}</span>
+                                @enderror
+                                <div id="main_image_preview_wrapper" class="mt-2">
+                                    <img id="main_image_preview" src="" alt="cj_image" class="mt-2" style="max-width:120px;display:none;" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="video" class="form-label">Product Video</label>
+                                <input type="file" class="form-control" id="video" name="video" />
+                                @error('video')
+                                <span id="video" class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{--Other images--}}
+                            <div class="col-md-12">
+                                <label for="other_images" class="form-label">Other Images<span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="other_images" name="other_images[]" multiple accept="image/*">
+                                @error('other_images')
+                                <span id="other_image_error_message" class="text-danger">{{ $message }}</span>
+                                @enderror
+                                <div class="other_image_preview"></div>
+                            </div>
+
+                            <!-- Variants Title -->
+
+                            <div class="col-md-12">
+                                <label for="variants_title" class="form-label">Variants Title</label>
+                                <input type="text" class="form-control" id="variants_title" name="variants_title" value="{{ old('variants_title') }}" placeholder="Color, Size, etc   " />
+                                @error('variants_title')
+                                <span id="variants_title_error_message" class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
                             <!-- Variants Section -->
-                            <div class="col-md-12 mt-4" id="variantSection" style="display:none;">
+                            <div class="col-md-12 mt-4" id="variantSection">
                                 <h5 class="fw-bold mb-3">Product Variants</h5>
                                 <div class="table-responsive">
                                     <table class="table table-bordered align-middle">
@@ -178,14 +194,16 @@
                                         <tr>
                                             <th>Image</th>
                                             <th>Variant Key</th>
-                                            <th>CJ Buy Price</th>
+                                            <th>Buy Price</th>
                                             <th>Suggested Price</th>
-                                            <th>Set Selling Price</th>
+                                            <th>Selling Price</th>
+                                            <th>Action</th>
                                         </tr>
                                         </thead>
                                         <tbody id="variantTableBody"></tbody>
                                     </table>
                                 </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addVariantBtn">+ Add Variant</button>
                             </div>
 
                             <!-- Descriptions -->
@@ -199,8 +217,7 @@
 
                             <div class="col-md-12">
                                 <label for="long_description" class="form-label">Long Description</label>
-                                <textarea class="form-control" id="long_description" name="long_description" rows="5" placeholder="Enter product's long description">{{ old('long_description') }}</textarea>
-                                @error('long_description')
+                                <textarea name="long_description" id="long_description" class="form-control" rows="5" placeholder="Enter product long description">{{ old('long_description') }}</textarea>                                @error('long_description')
                                 <span id="long_description_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
@@ -231,6 +248,83 @@
                                 @enderror
                             </div>
 
+                            <!-- Product Owner -->
+                            <div class="mb-2">
+                                <label class="form-label d-block">Product Owner</label>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input
+                                                type="radio"
+                                                class="form-check-input"
+                                                id="own"
+                                                name="product_owner"
+                                                value="0"
+                                                {{ old('product_owner', '0') === '0' ? 'checked' : '' }}
+                                            >
+                                            <label for="own" class="form-check-label">Own</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input
+                                                type="radio"
+                                                class="form-check-input"
+                                                id="cj_dropshipping"
+                                                name="product_owner"
+                                                value="1"
+                                                {{ old('product_owner') === '1' ? 'checked' : '' }}
+                                            >
+                                            <label for="cj_dropshipping" class="form-check-label">CJ Dropshipping</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input
+                                                type="radio"
+                                                class="form-check-input"
+                                                id="aliexpress"
+                                                name="product_owner"
+                                                value="2"
+                                                {{ old('product_owner') === '2' ? 'checked' : '' }}
+                                            >
+                                            <label for="aliexpress" class="form-check-label">AliExpress</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Product Status -->
+                            <div class="mb-2">
+                                <label class="form-label d-block">Product Status</label>
+
+                                <div class="form-check form-check-inline">
+                                    <input
+                                        type="radio"
+                                        class="form-check-input"
+                                        id="status_published"
+                                        name="status"
+                                        value="1"
+                                        {{ old('status', 1) == 1 ? 'checked' : '' }}
+                                    >
+                                    <label for="status_published" class="form-check-label">Publish</label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input
+                                        type="radio"
+                                        class="form-check-input"
+                                        id="status_unpublished"
+                                        name="status"
+                                        value="0"
+                                        {{ old('status') == '0' ? 'checked' : '' }}
+                                    >
+                                    <label for="status_unpublished" class="form-check-label">Unpublish</label>
+                                </div>
+                            </div>
+
                             <!-- Featured -->
                             <div class="col-md-12">
                                 <div class="form-check">
@@ -244,21 +338,6 @@
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="is_trending" name="is_trending" value="1" {{ old('is_trending') ? 'checked' : '' }}>
                                     <label for="is_trending" class="form-check-label">Trending Product</label>
-                                </div>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input type="radio" class="form-check-input" id="status_published" name="status" checked value="1" {{ old('status') ? 'checked' : '' }} />
-                                    <label for="status_published" class="form-check-label">Publish</label>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input type="radio" class="form-check-input" id="status_unpublished" name="status" value="0" {{ old('status', 0) ? 'checked' : '' }} />
-                                    <label for="status_unpublished" class="form-check-label">Unpublish</label>
                                 </div>
                             </div>
                         </div>
@@ -275,20 +354,88 @@
 
 @push('scripts')
     <script>
+        $('#main_image').on('change', function () {
+            $('#main_image_error_message').empty();
+        });
+
+        $('#other_images').on('change', function () {
+            $('#other_image_error_message').empty();
+        });
+
+        $('#short_description').on('keyup', function () {
+            $('#short_description_error_message').empty();
+        })
+
+        $('#selling_price').on('keyup', function () {
+            $('#selling_price_error_message').empty();
+        });
+
+        $('#sku').on('keyup', function () {
+            $('#sku_error_message').empty();
+        });
+
+        $('#quantity').on('keyup', function () {
+            $('#quantity_error_message').empty();
+        });
+
+        $('#categoryId').on('change', function () {
+            $('#category_error_message').empty();
+        });
+        $('#name').on('keyup', function () {
+            $('#name_error_message').empty();
+        })
+
+        // --- Handle Add Variant manually ---
+        $(document).on('click', '#addVariantBtn', function () {
+            const rowCount = $('#variantTableBody tr').length;
+            const newRow = `
+                  <tr class="variant-item">
+                    <td>
+                      <input type="file" name="variants[${rowCount + 1}][image]" accept="image/*" class="form-control form-control-sm variant-image-input" />
+                      <img src="" alt="Preview" class="img-thumbnail mt-1" style="max-width:60px; display:none;">
+                    </td>
+                  <td><input type="text" name="variants[${rowCount + 1}][variant_key]" class="form-control form-control-sm" placeholder="Color - Size" /></td>
+                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][buy_price]" class="form-control form-control-sm" placeholder="0.00" /></td>
+                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][suggested_price]" class="form-control form-control-sm" placeholder="0.00" readonly /></td>
+                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][selling_price]" class="form-control form-control-sm" placeholder="0.00" /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-variant">Remove</button></td>
+                  </tr>`;
+            $('#variantTableBody').append(newRow);
+        });
+
+        // --- Preview uploaded variant image ---
+        $(document).on('change', '.variant-image-input', function () {
+            const file = this.files[0];
+            const img = $(this).closest('td').find('img');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.attr('src', e.target.result).show();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // --- Remove variant row ---
+        $(document).on('click', '.remove-variant', function () {
+            $(this).closest('tr').remove();
+        });
+
+
         $(document).ready(function () {
 
-            // Tag Inputs
+            // tag Inputs
             const sizesTagInput = createTagInput('#sizes');
             createTagInput('#meta_title');
             createTagInput('#tags');
 
-            // Helper: Status Message
+            // helper: Status Message
             const showStatus = (msg, type = '') => {
                 $('#cj_status').removeClass('text-danger text-success').text(msg);
                 if (type) $('#cj_status').addClass(type);
             };
 
-            // Helper: Image Preview
+            // helper: Image Preview
             const createImagePreview = (src, width = 100, height = 100, hiddenInputName = null) => {
                 let html = `
         <div class="position-relative d-inline-block" style="width:${width}px;height:${height}px;margin:5px;">
@@ -300,7 +447,8 @@
                style="cursor:pointer"></i>
         </div>`;
                 if (hiddenInputName) {
-                    html += `<input type="hidden" id="${hiddenInputName}" name="${hiddenInputName}" value="${src}">`;
+                    const id = hiddenInputName.replace(/\[\]/g, '');
+                    html += `<input type="hidden" id="${id}" name="${hiddenInputName}" value="${src}">`;
                 }
                 return html;
             };
@@ -311,17 +459,22 @@
                 $('.color-previews-container').empty();
             };
 
-            const previewFileInput = (input, wrapper, width = 100, height = 100) => {
+            const previewFileInput = (input, wrapper, width = 100, height = 100, hiddenInputName = null) => {
                 const files = input.files;
                 if (!files.length) return;
                 Array.from(files).forEach(file => {
                     const reader = new FileReader();
                     reader.onload = e => {
-                        $(wrapper).prepend(createImagePreview(e.target.result, width, height));
+                        $(wrapper).prepend(createImagePreview(e.target.result, width, height, hiddenInputName));
                     };
                     reader.readAsDataURL(file);
                 });
             };
+
+            // reset input error
+            const resetInputErrors = () => {
+                $('#category_error_message, #variants_title_error_message, #sub_category_error_message, #name_error_message, #selling_price_error_message, #regular_price_error_message, #quantity_error_message, #sku_error_message, #main_image_error_message, #other_image_error_message, #short_description_error_message, #long_description_error_message').empty();
+            }
 
             // CJ Product Search
             $('#btnSearchCJ').on('click', function () {
@@ -329,6 +482,9 @@
                 if (!query) return showStatus('SKU is required', 'text-danger');
 
                 showStatus('Searching CJ product...');
+
+                // reset previous inputs error
+                resetInputErrors();
 
                 $.ajax({
                     url: "{{ route('cj.product.search') }}",
@@ -350,7 +506,7 @@
                         $('#name').val(product.productNameEn ?? '');
                         $('#cj_id').val(product.pid);
                         $('#buy_price').val(product.sellPrice);
-                        $('#sku').val(product.productSku ?? '').attr('disabled', true);
+                        $('#sku').val(product.productSku ?? '').attr('readonly', true);
                         $('#long_description').summernote('code', product.description ?? '');
 
                         // Suggested Price Info
@@ -363,7 +519,7 @@
                         // Main Image
                         if (product.productImageSet?.length) {
                             $('#main_image_preview_wrapper').append(
-                                createImagePreview(product.productImageSet[0], 160, 140, "cj_main_image")
+                                createImagePreview(product.productImageSet[0], 160, 140, "main_image")
                             );
                         }
 
@@ -371,7 +527,7 @@
                         if (product.productImageSet?.length > 1) {
                             const container = $('.other_image_preview').empty();
                             product.productImageSet.slice(1).forEach(img => {
-                                container.append(createImagePreview(img, 100, 100, "cj_other_images[]"));
+                                container.append(createImagePreview(img, 100, 100, "other_images[]"));
                             });
                         }
 
@@ -415,9 +571,11 @@
 
                                 // Case 1: Has size → store under sizes[size]
                                 if (size) {
+                                    sizes.push(size);
                                     variantMap[baseColor].sizes[size] = {
                                         vid: variant.vid,
                                         variantKey: variant.variantKey,
+                                        variantSku: variant.variantSku,
                                         buy_price: variant.variantSellPrice,
                                         suggestion_sell_price: variant.variantSugSellPrice,
                                         selling_price: '',
@@ -433,6 +591,7 @@
                                     variantMap[baseColor].default = {
                                         vid: variant.vid,
                                         variantKey: variant.variantKey,
+                                        variantSku: variant.variantSku,
                                         buy_price: variant.variantSellPrice,
                                         suggestion_sell_price: variant.variantSugSellPrice,
                                         selling_price: '',
@@ -445,47 +604,52 @@
                                 }
                             });
 
-
                             //  Apply Sizes
                             sizesTagInput.setValues(sizes);
 
                             //  Show Color Previews (no duplicates)
                             $('.color-previews-container').empty();
+                            const color_images = [];
                             Object.entries(variantMap).forEach(([color, data]) => {
+                                $('#colors_error_message').empty();
                                 const img = data.image || data.default?.image;
+
                                 if (img && !imageSet.has(img)) {
+
                                     imageSet.add(img);
+                                    color_images.push(img);
                                     colorImagePreview(img);
                                 }
                             });
 
                             // Render Variant Table
                             let rows = '';
-                            const renderRow = (v, color, sizeLabel) => `
-                        <tr>
-                            <td class="text-center">
-                                <img src="${v.image}" width="60" height="60" style="object-fit:cover;border-radius:6px;"
-                                     alt="${color}-${sizeLabel}" referrerpolicy="no-referrer" />
-                            </td>
-                            <td>${v.variantKey}</td>
-                            <td>$${Number(v.buy_price).toFixed(2)}</td>
-                            <td>$${Number(v.suggestion_sell_price).toFixed(2)}</td>
-                            <td>
-                                <input type="number" step="0.01" class="form-control form-control-sm"
-                                    name="variants[${v.vid}][selling_price]" placeholder="Enter price">
-                                <input type="hidden" name="variants[${v.vid}][vid]" value="${v.vid}">
-                                <input type="hidden" name="variants[${v.vid}][variant_key]" value="${v.variantKey}">
-                                <input type="hidden" name="variants[${v.vid}][buy_price]" value="${v.buy_price}">
-                                <input type="hidden" name="variants[${v.vid}][suggestion_sell_price]" value="${v.suggestion_sell_price}">
-                                <input type="hidden" name="variants[${v.vid}][width]" value="${v.width}">
-                                <input type="hidden" name="variants[${v.vid}][height]" value="${v.height}">
-                                <input type="hidden" name="variants[${v.vid}][weight]" value="${v.weight}">
-                                <input type="hidden" name="variants[${v.vid}][length]" value="${v.length}">
-                                <input type="hidden" name="variants[${v.vid}][color]" value="${color}">
-                                <input type="hidden" name="variants[${v.vid}][size]" value="${sizeLabel}">
-                                <input type="hidden" name="variants[${v.vid}][image]" value="${v.image}">
-                            </td>
-                        </tr>`;
+                            const renderRow = (v) => `
+                                 <tr class="variant-item">
+                                      <td>
+                                        <img src="${v.image}" width="60" height="60" style="object-fit:cover;border-radius:6px;" alt="${v.id}" />
+                                        <input type="hidden" name="variants[${v.vid}][image]" value="${v.image}">
+                                      </td>
+                                      <td>
+                                        <input type="text" name="variants[${v.vid}][variant_key]" class="form-control form-control-sm" value="${v.variantKey}" readonly />
+                                      </td>
+                                      <td>
+                                        <input type="number" step="0.01" name="variants[${v.vid}][buy_price]" class="form-control form-control-sm" value="${v.buy_price}" readonly />
+                                      </td>
+                                      <td>
+                                        <input type="number" step="0.01" name="variants[${v.vid}][suggested_price]" class="form-control form-control-sm" value="${v.suggestion_sell_price}" readonly />
+                                      </td>
+                                      <td>
+                                        <input type="number" step="0.01" name="variants[${v.vid}][selling_price]" class="form-control form-control-sm" placeholder="0.00" />
+                                      </td>
+                                      <td>
+                                        <button type="button" class="btn btn-danger btn-sm remove-variant">Remove</button>
+                                      </td>
+                                    <td class="d-none">
+                                    <input type="hidden" name="variants[${v.vid}][vid]" value="${v.vid}" />
+                                    <input type="hidden" name="variants[${v.vid}][sku]" value="${v.variantSku}" />
+                                    </td>
+                                 </tr>`;
 
                             Object.entries(variantMap).forEach(([color, data]) => {
                                 Object.entries(data.sizes).forEach(([size, v]) => {
@@ -499,7 +663,7 @@
                             // --- ✅ Append single JSON input to send clean data to backend
                             const form = $('form');
                             form.find('input[name="variant_json"]').remove(); // remove old if exist
-                            form.append(`<input type="hidden" name="variant_json" value='${JSON.stringify(variantMap)}'>`);
+                            form.append(`<input type="hidden" name="variant_json" value='${JSON.stringify(variantMap).replace(/'/g, "&apos;")}'>`);
                         } else {
                             $variantSection.hide();
                         }
@@ -512,8 +676,9 @@
 
             //  Color Preview
             function colorImagePreview(image) {
+                $('#colors_error_message').empty();
                 const container = $('.color-previews-container');
-                container.append(createImagePreview(image, 60, 60));
+                container.append(createImagePreview(image, 60, 60, 'color_images[]'));
             }
 
             //  Main Image Upload
@@ -529,7 +694,8 @@
 
             // Color Upload
             $('#colors').on('change', function () {
-                previewFileInput(this, '.color-previews-container', 60, 60);
+                $('#colors_error_message').empty();
+                previewFileInput(this, '.color-previews-container', 60, 60, 'color_images[]');
             });
 
             // Remove Image
@@ -568,6 +734,7 @@
                 const finalPrice = regular - (regular * (discount / 100));
                 sellingPrice.val(finalPrice.toFixed(2));
             };
+
             $('#discount, #regular_price').on('input', calculateSellingPrice);
 
             // Dynamic Subcategories
@@ -575,7 +742,7 @@
                 const categoryId = $(this).val();
                 const subCategorySelect = $('#subCategoryId');
                 if (!categoryId)
-                    return subCategorySelect.html('<option value="">Select sub-category</option>');
+                    return subCategorySelect.html('<option value="">Select sub category</option>');
                 $.get(`/get-sub-categories/${categoryId}`, function (res) {
                     subCategorySelect.html('<option value="">Select sub-category</option>');
                     res.forEach(sc => subCategorySelect.append(`<option value="${sc.id}">${sc.name}</option>`));
@@ -583,95 +750,8 @@
             });
 
             // 📝 Summernote Init
-            $('#long_description').summernote();
+            $('#long_description').summernote({ height: 200, placeholder: 'Enter product long description...' });
         });
     </script>
 
 @endpush
-
-{{--const variantMap = {}; // color -> { image, sizes: { size: variant } }--}}
-
-{{--product.variants.forEach(variant => {--}}
-{{--if (!variant.variantKey) return;--}}
-{{--const parts = variant.variantKey.split('-');--}}
-{{--const color = parts[0]?.trim();--}}
-{{--const size = parts[1]?.trim();--}}
-
-{{--if (!color) return;--}}
-
-{{--if (!variantMap[color]) {--}}
-{{--// store first image we find for this color--}}
-{{--variantMap[color] = {--}}
-{{--image: variant.variantImage,--}}
-{{--sizes: {}--}}
-{{--};--}}
-{{--}--}}
-
-{{--// If this color has no image yet, and this variant has one, use it--}}
-{{--if (!variantMap[color].image && variant.variantImage) {--}}
-{{--variantMap[color].image = variant.variantImage;--}}
-{{--}--}}
-
-{{--// Save size info under this color--}}
-{{--if (size) {--}}
-{{--variantMap[color].sizes[size] = {--}}
-{{--vid: variant.vid,--}}
-{{--price: variant.variantSellPrice,--}}
-{{--suggest: variant.variantSugSellPrice,--}}
-{{--image: variant.variantImage--}}
-{{--};--}}
-{{--}--}}
-{{--});--}}
-
-
-
-
-{{--const productVariants = {--}}
-{{--colors: {--}}
-{{--"Red": {--}}
-{{--image: "https://example.com/red.jpg",--}}
-{{--sizes: {--}}
-{{--"S": {--}}
-{{--vid: "12345",--}}
-{{--variantKey: "Red-S",--}}
-{{--buy_price: 10.5,--}}
-{{--selling_price: 12.99,--}}
-{{--suggestion_sell_price: 13.99,--}}
-{{--width: 10,--}}
-{{--height: 15,--}}
-{{--weight: 0.3,--}}
-{{--length: 20--}}
-{{--},--}}
-{{--"M": {--}}
-{{--vid: "12346",--}}
-{{--variantKey: "Red-M",--}}
-{{--buy_price: 11.0,--}}
-{{--selling_price: 13.5,--}}
-{{--suggestion_sell_price: 14.99,--}}
-{{--width: 10,--}}
-{{--height: 15,--}}
-{{--weight: 0.35,--}}
-{{--length: 22--}}
-{{--}--}}
-{{--}--}}
-{{--},--}}
-{{--"Blue": {--}}
-{{--image: "https://example.com/blue.jpg",--}}
-{{--sizes: {} // No sizes, maybe one default variant--}}
-{{--}--}}
-{{--},--}}
-{{--noVariant: {--}}
-{{--vid: "99999",--}}
-{{--variantKey: "Default",--}}
-{{--buy_price: 5.0,--}}
-{{--selling_price: 7.0,--}}
-{{--suggestion_sell_price: 7.5,--}}
-{{--width: 12,--}}
-{{--height: 8,--}}
-{{--weight: 0.2,--}}
-{{--length: 10--}}
-{{--}--}}
-{{--};--}}
-
-
-
