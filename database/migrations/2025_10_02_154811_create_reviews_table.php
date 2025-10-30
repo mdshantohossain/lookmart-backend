@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('rating')->nullable();
-            $table->longText('comment')->nullable();
+            $table->longText('message')->nullable();
             $table->timestamps();
         });
     }

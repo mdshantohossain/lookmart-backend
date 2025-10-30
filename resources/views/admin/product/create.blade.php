@@ -421,14 +421,21 @@
             $(this).closest('tr').remove();
         });
 
-
         $(document).ready(function () {
-
             // tag Inputs
             const sizesTagInput = createTagInput('#sizes');
-            createTagInput('#meta_title');
-            createTagInput('#tags');
+            const metaTitles = createTagInput('#meta_title');
+            const tags = createTagInput('#tags');
 
+            const metaOldValues = "{{ old('meta_title') }}";
+
+            if(metaOldValues) {
+                metaTitles.setValues(metaOldValues);
+            }
+            const oldTags = "{{ old('tags') }}";
+            if(oldTags) {
+                tags.setValues(oldTags);
+            }
             // helper: Status Message
             const showStatus = (msg, type = '') => {
                 $('#cj_status').removeClass('text-danger text-success').text(msg);

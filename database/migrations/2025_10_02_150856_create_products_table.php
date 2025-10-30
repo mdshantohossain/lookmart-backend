@@ -33,18 +33,18 @@ return new class extends Migration
             $table->longText('long_description')->nullable();
             $table->integer('total_clicked')->default(0);
             $table->json('materials')->nullable();
-            $table->string('tags')->nullable();
+            $table->text('tags')->nullable();
             $table->text('sizes')->nullable();
             $table->json('color_images')->nullable();
             $table->string('variants_title')->nullable();
-            $table->string('meta_title')->nullable();
+            $table->text('meta_title')->nullable();
             $table->text('meta_description')->nullable();
             $table->json('product_policies')->nullable();
             $table->tinyInteger('is_trending')->default(0)->comment('0: false; 1: true');
-            $table->tinyInteger('is_featured')->nullable()->comment('0: false, 1: true');
+            $table->tinyInteger('is_featured')->default(0)->comment('0: false, 1: true');
             $table->tinyInteger('status');
             $table->tinyInteger('product_owner')->default(0)->comment('0: own, 1: cj dropshopping, 2: ali express');
-            $table->text('slug')->unique();
+            $table->text('slug')->unique()->index();
             $table->timestamps();
         });
     }

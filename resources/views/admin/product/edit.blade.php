@@ -12,7 +12,7 @@
                 </div>
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route('products.update', $product->id) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('products.update', $product->slug) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -59,34 +59,34 @@
                             <div class="col-md-3">
                                 <label class="form-label">Original Price</label>
                                 <input type="number" step="0.01" id="regular_price" name="regular_price" class="form-control"
-                                       value="{{ old('regular_price', $product->regular_price) }}" placeholder="0.00" />
+                                       value="{{ $product->regular_price }}" placeholder="0.00" />
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label">Discount (%)</label>
                                 <input type="text" id="discount" name="discount" class="form-control"
-                                       value="{{ old('discount', $product->discount) }}" placeholder="0%" />
+                                       value="{{ $product->discount }}" placeholder="0%" />
                                 <small id="discountError" class="text-danger"></small>
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label">Selling Price</label>
                                 <input type="number" step="0.01" id="selling_price" name="selling_price" class="form-control"
-                                       value="{{ old('selling_price', $product->selling_price) }}" placeholder="0.00" />
+                                       value="{{ $product->selling_price }}" placeholder="0.00" />
                             </div>
 
                             <!-- SKU -->
                             <div class="col-md-3">
                                 <label class="form-label">SKU<span class="text-danger">*</span></label>
                                 <input type="text" name="sku" class="form-control"
-                                       value="{{ old('sku', $product->sku) }}" />
+                                       value="{{ $product->sku }}" />
                             </div>
 
                             <!-- Quantity -->
                             <div class="col-md-6">
                                 <label class="form-label">Quantity <span class="text-danger">*</span></label>
                                 <input type="number" name="quantity" class="form-control" min="1"
-                                       value="{{ old('quantity', $product->quantity) }}" placeholder="Enter product quantity" />
+                                       value="{{ $product->quantity }}" placeholder="Enter product quantity" />
                             </div>
 
                             <!-- Product sizes -->
@@ -106,7 +106,18 @@
                                 <span id="colors" class="text-danger">{{ $message }}</span>
                                 @enderror
 
-                                <div class="color-previews-container d-flex flex-wrap"></div>
+                                <div class="color-previews-container d-flex flex-wrap">
+                                    @foreach($product->color_images as $image)
+                                        <div class="position-relative d-inline-block" style="width: 60px;height:60px;margin:5px;">
+                                            <img src="{{ $image }}" class="img-thumbnail rounded-2"
+                                                 style="width: 60px;height:60px;object-fit:cover;border-radius:8px;"
+                                                 loading="lazy" alt="product" referrerpolicy="no-referrer" />
+                                            <i data-img-url="${src}"
+                                               class="position-absolute top-0 end-0 remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger"
+                                               style="cursor:pointer"></i>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
 
                             <!-- Main Image -->
@@ -396,7 +407,7 @@
             // tag Inputs
             const sizesTagInput = createTagInput('#sizes');
             const metaTitleInput = createTagInput('#meta_title');
-            const tagInput = createTagInput('#tags');
+            const tagsInput = createTagInput('#tags');
 
             const sizes = "{{ $product->sizes }}";
             if(sizes) {
@@ -405,7 +416,12 @@
 
             const metaTitle = "{{ $product->meta_title }}";
             if(metaTitle) {
-                sizesTagInput.setValues(metaTitle)
+                metaTitleInput.setValues(metaTitle)
+            }
+
+            const tags = "{{ $product->tags }}";
+            if(tags) {
+                tagsInput .setValues(tags);
             }
 
             // Sub-category dynamic loading

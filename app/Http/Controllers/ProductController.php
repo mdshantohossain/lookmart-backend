@@ -44,15 +44,15 @@ class ProductController extends Controller
             ]);
     }
 
-    public function store(ProductCreateRequest $request, ProductService $productService): RedirectResponse
+    public function store(ProductCreateRequest $request, ProductService $productService)
     {
-        // check permission of request user
         isAuthorized('product create');
 
         $product = $productService->createOrUpdate($request->all());
 
         if (!$product) {
-            return back()->with('error', 'Product could not be created.');
+            return back()->with('error', 'Product could not be cr
+        // check permission of request usereated.');
         }
 
         return  redirect('/products')->with('success', 'Product created successfully');
@@ -70,10 +70,14 @@ class ProductController extends Controller
         ]);
     }
 
-    public function edit(Product $product): View
+    public function edit(Product $product)
     {
         // check permission of request user
         isAuthorized('product edit');
+
+        if (!empty($product->color_images)) {
+            $product->color_images = json_decode($product->color_images, true);
+        }
 
         return view('admin.product.edit', [
             'categories' => Category::where('status',  1)->get(),
@@ -82,8 +86,9 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(ProductUpdateRequest $request, Product $product): RedirectResponse
+    public function update(Request $request, Product $product)
     {
+        return $request;
         // check permission of current user
         isAuthorized('product edit');
 
