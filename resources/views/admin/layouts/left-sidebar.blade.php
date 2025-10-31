@@ -27,15 +27,19 @@
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
                             @canany(['category create', 'category edit', 'category destroy'])
-                            <li><a href="{{ url('/categories') }}" key="t-basic-tables">Category Manage</a></li>
+                                 <li><a href="{{ url('/categories') }}" key="t-basic-tables">Category Manage</a></li>
                             @endcanany
 
                             @canany(['sub-category create', 'sub-category edit', 'sub-category destroy'])
-                            <li><a href="{{ url('/sub-categories') }}" key="t-data-tables">Sub Category Manage</a></li>
+                                 <li><a href="{{ url('/sub-categories') }}" key="t-data-tables">Sub Category Manage</a></li>
                             @endcanany
 
                             @canany(['product create', 'product edit', 'product destroy'])
-                            <li><a href="{{ route('products.index') }}" key="t-responsive-table">Product Manage</a></li>
+                                <li><a href="{{ route('products.index') }}" key="t-responsive-table">Product Manage</a></li>
+                            @endcanany
+
+                            @canany(['review create', 'review edit', 'review destroy'])
+                                <li><a href="{{ route('reviews.index') }}" key="t-responsive-table">Product Review</a></li>
                             @endcanany
 
                             @canany(['product policy create', 'product policy edit', 'product policy destroy'])

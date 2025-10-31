@@ -70,8 +70,8 @@ if(!function_exists('getImageUrl')) {
     {
         $imageName = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
 
-        $image->move($path, $imageName);
-        // Return the URL accessible from browser (via public/storage)
+        $image->move($path,'/'. $imageName);
+        // Return the URL accessible from browser
         return asset($path. '/'. $imageName);
     }
 }
@@ -79,18 +79,11 @@ if(!function_exists('getImageUrl')) {
 if(!function_exists('generateUniqueSlug')) {
     function generateUniqueSlug($name): string
     {
-        // base slug
         $slug = Str::slug($name);
-
-        // check if slug already exists
-        $originalSlug = $slug;
-        $counter = 1;
-
-        while (Product::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
-            $counter++;
+        $exists = Product::where('slug', $slug)->exists();
+        if ($exists) {
+            $slug .= '-' . Str::random(15);
         }
-
         return $slug;
     }
 }

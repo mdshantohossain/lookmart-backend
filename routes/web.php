@@ -1,28 +1,31 @@
 <?php
 
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\Website\OrderController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController;
+
+use App\Http\Controllers\AliExpressController;
+use App\Http\Controllers\AppCredentialController;
+use App\Http\Controllers\AppManageController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CjController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductPolicyController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ShippingChargeController;
 use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Website\OrderController;
 use App\Http\Controllers\Website\UserController as ClientController;
 use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\AppCredentialController;
-use App\Http\Controllers\ShippingChargeController;
-use App\Http\Controllers\AppManageController;
-use App\Http\Controllers\CjController;
-use App\Http\Controllers\ProductPolicyController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\AliExpressController;
+use App\Http\Controllers\ReviewController;
 
 // middleware
-use App\Http\Middleware\AuthenticatedForUserMiddleware;
 use App\Http\Middleware\AdminAuthenticatedMiddleware;
+use App\Http\Middleware\AuthenticatedForUserMiddleware;
+
 
 // custom login route
 Route::post('/login', [LoginController::class, 'login'])->name('login');
@@ -76,6 +79,9 @@ Route::middleware(['auth', config('jetstream.auth_session'), 'verified'])->group
 
         Route::resource('products', ProductController::class)
             ->middleware(['permission:product create|product edit|product destroy']);
+
+        Route::resource('reviews', ReviewController::class)
+            ->middleware(['permission:review create|review edit|review destroy']);
 
         Route::resource('product-policies', ProductPolicyController::class)->except(['show'])
             ->middleware(['permission:product policy create|product policy edit|product policy destroy']);

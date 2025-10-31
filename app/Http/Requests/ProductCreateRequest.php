@@ -44,33 +44,17 @@ class ProductCreateRequest extends FormRequest
             'is_featured' => 'string|nullable',
             'is_trending' => 'string|nullable',
             'variants' => 'nullable|array',
-            'main_image' => 'required',
-            'other_images' => [
-                'required',
-                'array', // make sure it's an array
-            ],
-            'other_images.*' => [
-                function ($attribute, $value, $fail) {
-                    // $value can be UploadedFile OR string (URL)
-                    if (!$value instanceof \Illuminate\Http\UploadedFile && !filter_var($value, FILTER_VALIDATE_URL)) {
-                        $fail('Each other image must be either an uploaded image or a valid URL.');
-                    }
-                },
-            ],
-            'color_images' => 'nullable|array',
-            'color_images.*' => [
-                function ($attribute, $value, $fail) {
-                    if (!$value instanceof \Illuminate\Http\UploadedFile && !filter_var($value, FILTER_VALIDATE_URL)) {
-                        $fail('The main image must be either an uploaded image or a valid URL.');
-                    }
-                },
-            ],
+
         ];
 
         if($this->isMethod('put') || $this->isMethod('patch')) {
-
+            $rules['main_image'] = 'nullable';
+            $rules['other_images'] = 'nullable|array';
+            $rules['color_images'] = 'nullable|array';
         } else {
-
+            $rules['main_image'] = 'required';
+            $rules['other_images'] = 'required|array';
+            $rules['color_images'] = 'required|array';
         }
 
         if ($this->input('product_owner') == '0') {
