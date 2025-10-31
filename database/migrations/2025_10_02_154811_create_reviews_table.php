@@ -16,9 +16,12 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->string('name');
             $table->string('rating')->nullable();
-            $table->longText('message')->nullable();
+            $table->text('message')->nullable();
+            $table->text('slug')->unique();
+            $table->time('published_at')->nullable();
             $table->timestamps();
         });
     }

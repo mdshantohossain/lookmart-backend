@@ -22,4 +22,5 @@ yarn-error.log
 /.vscode
 /.zed
 /images
-/admin/assets/uploaded-images
+/public/admin/assets/uploaded-images
+/public/assets

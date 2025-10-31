@@ -20,7 +20,7 @@ class SubCategoryController extends Controller
 
     public function create(): View
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('sub-category create');
 
         return view('admin.sub-category.create', [
@@ -30,7 +30,7 @@ class SubCategoryController extends Controller
 
     public function store(SubCategoryRequest $request, SubCategoryService $subCategoryService): RedirectResponse
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('sub-category create');
 
         $subCategory = $subCategoryService->updateOrCreate($request->validated());
@@ -42,7 +42,7 @@ class SubCategoryController extends Controller
 
     public function edit(SubCategory $subCategory): View
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('sub-category edit');
 
         return view('admin.sub-category.edit', [
@@ -53,7 +53,7 @@ class SubCategoryController extends Controller
 
     public function  update(SubCategoryRequest $request, SubCategory $subCategory, SubCategoryService $subCategoryService)
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('sub-category edit');
 
         $subCategory = $subCategoryService->updateOrCreate($request->validated(), $subCategory);
@@ -66,7 +66,7 @@ class SubCategoryController extends Controller
 
     public function destroy(SubCategory $subCategory): RedirectResponse
     {
-        // check permission of current user
+        // check permission of request user
         isAuthorized('sub-category destroy');
         try {
             $subCategory->delete();

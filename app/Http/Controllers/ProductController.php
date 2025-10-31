@@ -44,18 +44,18 @@ class ProductController extends Controller
             ]);
     }
 
-    public function store(ProductCreateRequest $request, ProductService $productService)
+    public function store(ProductCreateRequest $request, ProductService $productService): RedirectResponse
     {
+        // check permission of request user.
         isAuthorized('product create');
 
         $product = $productService->createOrUpdate($request->all());
 
         if (!$product) {
-            return back()->with('error', 'Product could not be cr
-        // check permission of request usereated.');
+            return back()->with('error', 'Product could not be created');
         }
 
-        return  redirect('/products')->with('success', 'Product created successfully');
+        return redirect('/products')->with('success', 'Product created successfully');
     }
 
     public function show(Product $product): View
