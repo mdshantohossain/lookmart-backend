@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\Admin\Category;
 use App\Models\Admin\SubCategory;
 use App\Models\ProductPolicy;
+use App\Models\Brand;
 
 return new class extends Migration
 {
@@ -18,7 +19,8 @@ return new class extends Migration
             $table->id();
             $table->string('cj_id')->nullable();
             $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(SubCategory::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(SubCategory::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Brand::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->float('selling_price');
             $table->float('regular_price')->nullable();

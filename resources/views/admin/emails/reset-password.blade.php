@@ -110,7 +110,7 @@
         <p>Please click the button below to set a new password:</p>
 
         <div class="btn-container">
-            <a href="{{ $resetUrl }}" class="btn">Reset Password</a>
+            <a href="{{ $url }}" class="btn">Reset Password</a>
         </div>
 
         <p>If you did not request a password reset, no further action is required.</p>

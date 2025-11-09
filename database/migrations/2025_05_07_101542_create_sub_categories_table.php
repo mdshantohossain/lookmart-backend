@@ -14,16 +14,14 @@ return new class extends Migration
     {
         Schema::create('sub_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('cj_id')->unique()->nullable();
             $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('name');
             $table->text('image')->nullable();
             $table->string('slug');
+            $table->text('description')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
 
-            // composite unique: slug + category_id
-//            $table->unique(['category_id', 'slug']);
         });
     }
 

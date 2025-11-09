@@ -18,52 +18,14 @@ class CategoryController extends Controller
 {
     public function getAllCategories()
     {
-        $category = Category::where('status', 1)->get();
+        $category = Category::with(['subCategories', 'products' => function ($query) {
+            $query->latest()->take(6);
+        }])->where('status', 1)->get();
         return response()->json($category);
     }
 
     public function index(): View
     {
-         $res = Http::withHeaders([
-             'CJ-Access-Token' => env('CJ_ACCESS_TOKEN')
-         ])->get("https://developers.cjdropshipping.com/api2.0/v1/product/getCategory");
-
-         $categories = $res->json('data');
-
-         foreach($categories as $category) {
-             // category created
-             $firstCategory = Category::updateOrCreate(
-                 ['cj_id' => $category['categoryFirstId']],
-                 [
-                     'name' => $category['categoryFirstName'],
-                     'slug' => Str::slug($category['categoryFirstName']),
-                 ]
-             );
-
-             foreach($category['categoryFirstList'] as $subCategory) {
-                SubCategory::updateOrCreate(
-                     ['cj_id' => $subCategory['categorySecondId']],
-                     [
-                         'category_id' => $firstCategory->id,
-                         'name' => $subCategory['categorySecondName'],
-                         'slug' => Str::slug($subCategory['categorySecondName']),
-                     ]
-                 );
-                 if(! empty($subCategory['categorySecondList'])) {
-                     foreach ($subCategory['categorySecondList'] as $subSubCategory) {
-                         SubCategory::updateOrCreate(
-                             ['cj_id' => $subSubCategory['categoryId']],
-                             [
-                                 'category_id' => $firstCategory->id,
-                                 'name' => $subSubCategory['categoryName'],
-                                 'slug' => Str::slug($subSubCategory['categoryName']),
-                             ]
-                         );
-                     }
-                 }
-             }
-         }
-
         return view('admin.category.index', [
             'categories' => Category::all()
         ]);

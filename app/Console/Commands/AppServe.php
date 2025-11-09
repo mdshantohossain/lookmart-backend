@@ -26,6 +26,6 @@ class AppServe extends Command
     public function handle()
     {
         $this->info('Application starting on network serve...');
-        passthru('php artisan serve --host=0.0.0.0 --port=8000');
+        passthru('php artisan serve --host=192.168.0.106');
     }
 }

@@ -174,8 +174,9 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    public function getCategoryProducts(string $slug): JsonResponse
+    public function getCategoryProducts(): JsonResponse
     {
+        $slug = request()->query('query');
         try {
             $category = Category::where('slug', $slug)->first();
             $products = Product::where('category_id', $category->id)
@@ -192,8 +193,10 @@ class ProductController extends Controller
         }
     }
 
-    public function getSubCategoryProducts(string $slug): JsonResponse
+    public function getSubCategoryProducts(): JsonResponse
     {
+        $slug = request()->query('query');
+
         try {
             $subCategory = SubCategory::where('slug', $slug)->first();
 
