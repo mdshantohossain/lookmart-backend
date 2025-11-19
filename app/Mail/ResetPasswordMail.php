@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -9,17 +10,19 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ResetPasswordMail extends Mailable
+class ResetPasswordMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public array $data;
+    public User $user;
+    public string $url;
     /**
      * Create a new message instance.
      */
-    public function __construct(array $data)
+    public function __construct(User $user, string $url)
     {
-        $this->data = $data;
+        $this->user = $user;
+        $this->url = $url;
     }
 
     /**
@@ -38,7 +41,7 @@ class ResetPasswordMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.reset-password',
+            view: 'admin.emails.reset-password',
         );
     }
 

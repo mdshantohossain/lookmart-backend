@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class RegistrationRequest extends FormRequest
+class RoleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,10 +22,15 @@ class RegistrationRequest extends FormRequest
      */
     public function rules(): array
     {
+        if($this->isMethod('post')) {
+            $rule = Rule::unique('roles', 'name');
+        } else {
+            $rule = Rule::unique('roles', 'name')->ignore($this->route('role')?->id);
+        }
+
         return [
-            'name'  => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
+            'name' => ['required', 'string', $rule],
+            'permissions' => ['required', 'array'],
         ];
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class VerificationMail extends Mailable
+class VerificationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -42,7 +42,7 @@ class VerificationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.verification-email',
+            view: 'admin.emails.verification-email',
         );
     }
 

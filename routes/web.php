@@ -28,7 +28,7 @@ use App\Http\Middleware\AuthenticatedForUserMiddleware;
 
 
 // custom login route
-Route::post('/login', [LoginController::class, 'login'])->name('login');
+Route::post('/login', [LoginController::class, 'index'])->name('login');
 
 Route::get('/aliexpress/redirect', [AliExpressController::class, 'redirectToAliExpress']);
 Route::get('/aliexpress/callback', [AliExpressController::class, 'handleCallback']);
@@ -39,6 +39,8 @@ Route::get('/aliexpress/categories', [AliExpressController::class, 'getCategorie
 
 // order routes
 Route::post( '/order-store', [OrderController::class, 'store'])->name( 'order.store');
+
+Route::view('/test', 'test');
 
 // login with socialite route
 Route::get('/auth/google', function () {

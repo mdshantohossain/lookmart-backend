@@ -27,7 +27,7 @@ class AppManageController extends Controller
                     unlink($appManager->$fileKey);
                 }
 
-                $inputs[$fileKey] = $this->getImageUrl($request->file($fileKey), 'images/app-manage');
+                $inputs[$fileKey] = getImageUrl($request->file($fileKey), 'images/app-manage');
             }
         }
 
@@ -44,6 +44,9 @@ class AppManageController extends Controller
 
     public function getAppInfo(): JsonResponse
     {
-        return response()->json(AppManage::first());
+        return response()->json([
+            'success' => true,
+            'data' => AppManage::first()
+        ]);
     }
 }

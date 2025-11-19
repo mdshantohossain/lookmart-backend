@@ -99,18 +99,18 @@
 
     <!-- Header -->
     <div class="email-header">
-        <h2>📧 Verify Your Email Address</h2>
+        <h2>Verify Your Email Address</h2>
     </div>
 
     <!-- Body -->
     <div class="email-body">
-        <h3>Hello {{ $user['name'] }},</h3>
+        <h3>Hello Md Shanto Hossain,</h3>
         <p>Thank you for joining <strong>{{ config('app.name') }}</strong>! We’re excited to have you on board.</p>
 
         <p>To complete your registration, please verify your email address by clicking the button below:</p>
 
         <div class="btn-container">
-            <a href="{{ $verificationUrl }}" class="btn">Verify Email</a>
+            <a href="#" class="btn">Verify Email</a>
         </div>
 
         <p>If you didn’t create an account, you can safely ignore this email.</p>

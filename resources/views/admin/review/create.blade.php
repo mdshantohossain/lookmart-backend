@@ -12,6 +12,10 @@
                         <a href="{{ route('reviews.index') }}" class="btn btn-secondary btn-sm">Back</a>
                     </div>
 
+                    @foreach($errors->all() as $error)
+                        <p class="text-danger">{{ $error }}</p>
+                    @endforeach
+
                     <form method="POST" action="{{ route('reviews.store') }}">
                         @csrf
 
@@ -67,22 +71,17 @@
                         <div id="review-container">
                             <div class="review-row border rounded p-3 mb-3">
                                 <div class="row">
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label">Name<span class="text-danger">*</span></label>
                                         <input type="text" name="reviews[0][name]" class="form-control" placeholder="Reviewer name">
                                     </div>
 
-                                    <div class="col-md-3 mb-3">
-                                        <label class="form-label">User Name<span class="text-danger">*</span></label>
-                                        <input type="text" name="reviews[0][user_name]" class="form-control" placeholder="User name">
-                                    </div>
-
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label">Rating<span class="text-danger">*</span></label>
                                         <input type="number" min="1" max="5" name="reviews[0][rating]" class="form-control" placeholder="1-5">
                                     </div>
 
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label">Date</label>
                                         <input type="date" name="reviews[0][date]" class="form-control">
                                     </div>
@@ -193,22 +192,17 @@
                 newRow.classList.add('review-row', 'border', 'rounded', 'p-3', 'mb-3');
                 newRow.innerHTML = `
             <div class="row">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label">Name<span class="text-danger">*</span></label>
                     <input type="text" name="reviews[${reviewIndex}][name]" class="form-control" placeholder="Reviewer name">
                 </div>
 
-                <div class="col-md-3 mb-3">
-                    <label class="form-label">User Name<span class="text-danger">*</span></label>
-                    <input type="text" name="reviews[${reviewIndex}][user_name]" class="form-control" placeholder="User name">
-                </div>
-
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label">Rating<span class="text-danger">*</span></label>
                     <input type="number" min="1" max="5" name="reviews[${reviewIndex}][rating]" class="form-control" placeholder="1-5">
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label">Date</label>
                     <input type="date" name="reviews[${reviewIndex}][date]" class="form-control">
                 </div>
