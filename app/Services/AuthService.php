@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\EmailVerification;
+use App\Models\RefreshAccessToken;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -18,8 +20,6 @@ class AuthService
     {
         $this->mailService = $mailService;
     }
-
-
 
     /**
      * @param array{email: string, password: string} $data
@@ -38,7 +38,15 @@ class AuthService
             }
 
             if($user && Hash::check($data['password'], $user->password)) {
-                $token = $user->createToken('auth_token')->plainTextToken;
+                $token = $user->createToken('auth_token')->plainTextToken; // auth token for every request
+
+                $refreshToken = bin2hex(random_bytes(40)); // refresh token to valid old auth token
+
+                RefreshAccessToken::create([
+                    'user_id' => $user->id,
+                    'refresh_token' => $refreshToken,
+                    'expires_in' => now()->addDays(7),
+                ]);
 
                 return response()->json([
                     'success' => true,
@@ -47,7 +55,7 @@ class AuthService
                         'token' => $token,
                         'user' => $user,
                     ]
-                ]);
+                ])->cookie('refresh_token', $refreshToken, 60*24, null, null, false, true);
             }
 
             return response()->json([
@@ -264,10 +272,20 @@ class AuthService
         }
     }
 
-    public function logout(): void
+    public function logout(): JsonResponse
     {
+        $user = request()->user();
+        $user->currentAccessToken()->revoke();
+
+        RefreshAccessToken::where('user_id', $user->id)->delete();
+
         Auth::logout();
         session()->invalidate();
         session()->regenerateToken();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out'
+        ])->cookie('access_token', '', -1); // delete cookie
     }
 }

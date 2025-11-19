@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WishlistController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LoginController;
@@ -16,20 +17,26 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/categories', [CategoryController::class, 'getAllCategories']);
-Route::get('/exclusive-products', [ProductController::class, 'getAllProducts']);
-Route::get('/trending-products', [ProductController::class, 'getAllProducts']);
+Route::get('/exclusive-products', [ProductController::class, 'getExclusiveProducts']);
+Route::get('/trending-products', [ProductController::class, 'getTrendingProducts']);
 Route::get('/category-products', [ProductController::class, 'getCategoryProducts']);
 Route::get('/sub-category-products/{slug}', [ProductController::class, 'getSubCategoryProducts']);
 Route::get('/search-products', [SearchController::class, 'getSearchProducts']);
-
 
 // auth
 Route::post('/auth/register',  [RegistrationController::class, 'index']);
 Route::get('/auth/verify-email',  [RegistrationController::class, 'verifyEmail']);
 Route::get('/auth/resend-verification-email',  [RegistrationController::class, 'resendVerifyEmail']);
 Route::post('/auth/login',  [LoginController::class, 'login']);
+Route::post('/auth/logout',  [LoginController::class, 'logout']);
 Route::get('/auth/forgot-password',  [ForgotPasswordController::class, 'index']);
 Route::post('/auth/reset-password',  [ForgotPasswordController::class, 'store']);
+
+// refresh access_token
+Route::post('/auth/refresh-token', [LoginController::class, 'refreshToken']);
+
+// wishlist
+Route::post('/wishlist-add', [WishlistController::class, 'store']);
 
 // social login
 Route::post('/auth/social-login',  [SocialLoginController::class, 'socialLogin']);

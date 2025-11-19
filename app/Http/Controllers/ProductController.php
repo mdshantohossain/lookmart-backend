@@ -20,9 +20,30 @@ use function React\Promise\all;
 
 class ProductController extends Controller
 {
-    public function getAllProducts(): JsonResponse
+    public function getExclusiveProducts(): JsonResponse
     {
-        $products = Product::where('status', 1)->take(10)->get();
+        $products = Product::with('variants')
+                        ->select(['id', 'name', 'slug', 'main_image', 'selling_price', 'regular_price', 'discount']) // add more field if needed
+                        ->withCount('reviews')
+                        ->withAvg('reviews', 'rating')
+                        ->where('status', 1)
+                        ->take(30)
+                        ->get();
+
+        return response()->json($products);
+    }
+
+    public function getTrendingProducts(): JsonResponse
+    {
+        $products = Product::with('variants')
+                        ->select(['id', 'name', 'slug', 'main_image', 'selling_price', 'regular_price', 'discount']) // add more field if needed
+                        ->withCount('reviews')
+                        ->withAvg('reviews', 'rating')
+                        ->where('status', 1)
+                        ->where('is_trending', 1)
+                        ->take(20)
+                        ->get();
+
         return response()->json($products);
     }
 
@@ -166,24 +187,70 @@ class ProductController extends Controller
 
     public function getProductDetail(string $slug): JsonResponse
     {
-        $product = Product::with(['category', 'otherImages', 'reviews', 'variants'])->where('slug', $slug)->first();
+        if (!$slug) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Slug is missing',
+            ], 419);
+        }
 
-        if (!$product) return response()->json([
-            'error', 'Product not found'
+        $product = Product::with(['category', 'otherImages', 'reviews' => function ($query) {
+            $query->latest();
+        }, 'reviews.user', 'variants'])
+            ->where('slug', $slug)
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->first();
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Slug is missing',
+            ]);
+        }
+
+        // Fetch related products by category
+        $relatedProducts = Product::with( 'variants')
+            ->select(['id', 'name', 'slug', 'main_image', 'selling_price', 'regular_price', 'discount']) // add more field if needed
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'product' => $product,
+                'relatedProducts' => $relatedProducts,
+            ]
         ]);
-        return response()->json($product);
     }
 
     public function getCategoryProducts(): JsonResponse
     {
         $slug = request()->query('query');
+
         try {
+            if(!$slug) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Slug is required.'
+                ], 419);
+            }
+
             $category = Category::where('slug', $slug)->first();
             $products = Product::where('category_id', $category->id)
-                ->latest('id')
+                ->select(['name', 'slug', 'main_image', 'selling_price', 'regular_price', 'discount'])
+                ->latest()
                 ->get();
 
-            return response()->json($products);
+            return response()->json([
+                'success' => true,
+                'data' => $products,
+            ]);
         } catch (\Exception $exception) {
             return response()->json([
                 'status' => 'error',
@@ -198,13 +265,25 @@ class ProductController extends Controller
         $slug = request()->query('query');
 
         try {
+
+            if(!$slug) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Slug is required'
+                ], 419);
+            }
+
             $subCategory = SubCategory::where('slug', $slug)->first();
 
             $products = Product::where('sub_category_id', $subCategory->id)
-                ->latest('id')
+                ->select(['name', 'slug', 'main_image', 'selling_price', 'regular_price', 'discount'])
+                ->latest()
                 ->get();
 
-            return response()->json($products);
+            return response()->json([
+                'success' => true,
+                'data' => $products,
+            ]);
         } catch (\Exception $exception) {
             return response()->json([
                 'status' => 'error',

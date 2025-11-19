@@ -65,8 +65,8 @@ class RolePermissionsSeeder extends Seeder
             'send single email',
             'send multiple email',
 
-            'review show',
             'review create',
+            'review edit',
             'review destroy',
 
             'app-management create',

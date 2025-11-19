@@ -6,7 +6,6 @@ use App\Http\Requests\ReviewRequest;
 use App\Models\Admin\Product;
 use App\Models\Review;
 use App\Services\ReviewService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -17,9 +16,8 @@ class ReviewController extends Controller
         return view('admin.review.index', [
             'products' =>  Product::whereHas('reviews')
                 ->with('reviews', 'reviews.user')
-                ->select(['id', 'sku', 'name', 'main_image'])
                 ->latest()
-                ->get(),
+                ->get(['id', 'sku', 'name', 'main_image']),
         ]);
     }
 
@@ -33,7 +31,7 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function store(ReviewRequest $request, ReviewService $reviewService): RedirectResponse
+    public function store(ReviewRequest $request, ReviewService $reviewService)
     {
         $review = $reviewService->updateOrCreate($request->validated());
 

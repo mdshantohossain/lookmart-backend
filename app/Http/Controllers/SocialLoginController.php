@@ -16,8 +16,6 @@ class SocialLoginController extends Controller
 
         $socialUser = Socialite::driver($provider)->userFromToken($token);
 
-        logger()->info('user info: '. json_encode($socialUser));
-
         $user = User::updateOrCreate(
             ['email' => $socialUser->getEmail()],
             [

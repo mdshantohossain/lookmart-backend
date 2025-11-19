@@ -21,13 +21,19 @@ class ReviewRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'product_id' => 'required|exists:products,id',
-            'user_id' => 'required|exists:users,id',
-            'name' => 'nullable|string',
-            'rating' => 'required|numeric|min:1|max:5',
-            'message' => 'required|min:3',
-            'published_at' => 'nullable|date',
+            'reviews' => 'required|array|min:1',
+            'reviews.*.name' => 'required|min:3|max:28',
+            'reviews.*.rating' => 'required|min:1|max:5',
+            'reviews.*.message' => 'required|min:3',
+            'reviews.*.date' => 'nullable|date',
         ];
+
+        if($this->is('api/*')) {
+            $rules['user_id'] = 'required|exists:users,id';
+        }
+
+        return $rules;
     }
 }

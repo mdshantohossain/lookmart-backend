@@ -38,7 +38,7 @@
                                         {{ $loop->iteration }}
                                     </td>
                                     <td>
-                                        <img src="{{ $product->main_image }}" alt="{{ $product->name }}" />
+                                        <img src="{{ $product->main_image }}" width="60" height="60" class="rounded-2" alt="{{ $product->name }}" />
                                     </td>
                                     <td>
                                         {{ $product->name }}
@@ -50,26 +50,26 @@
                                         {{ count($product->reviews) }}
                                     </td>
 
-                                    @canany(['category edit', 'category destroy'])
+                                    @canany(['review edit', 'review destroy'])
                                     <td>
                                         <div>
-                                            @can('category edit')
-                                                <a href="{{ route('categories.edit', $review->slug) }}" class="btn btn-sm btn-primary" >
+                                            @can('review edit')
+                                                <a href="{{ route('reviews.edit', $product->id) }}" class="btn btn-sm btn-primary" >
                                                     <i class="fa fa-edit"></i>
                                                 </a>
                                             @endcan
 
                                             @can('review show')
-                                                 <a href="{{ route('categories.show', $review->slug) }}" class="btn btn-sm btn-success" >
-                                                    <i class="fa fa-edit"></i>
+                                                 <a href="{{ route('reviews.show', $product->id) }}" class="btn btn-sm btn-success" >
+                                                    <i class="fa fa-book-open"></i>
                                                  </a>
                                             @endcan
 
-                                            @can('category destroy')
-                                                <a href="#" class="btn btn-sm btn-danger" onclick='confirmDelete(event, "deleteForm-{{ $review->slug }}")'>
+                                            @can('review destroy')
+                                                <a href="#" class="btn btn-sm btn-danger" onclick='confirmDelete(event, "deleteForm-{{ $product->id }}")'>
                                                     <i class="fa fa-trash"></i>
                                                 </a>
-                                                <form action="{{ route('categories.destroy', $review->slug) }}" method="POST" id="deleteForm-{{ $review->slug }}">
+                                                <form action="{{ route('reviews.destroy', $product->id) }}" method="POST" id="deleteForm-{{ $product->id }}">
                                                     @csrf
                                                     @method('DELETE')
                                                 </form>

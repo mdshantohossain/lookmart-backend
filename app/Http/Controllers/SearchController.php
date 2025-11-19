@@ -21,7 +21,10 @@ class SearchController extends Controller
             $query = $request->query('query');
             $products = Product::where('name', 'like', "%$query%")->get();
 
-            return response()->json($products);
+            return response()->json([
+                'success' => true,
+                'data' => $products,
+            ]);
         } catch (\Exception $e) {
             return response()->json($e->getMessage());
         }
