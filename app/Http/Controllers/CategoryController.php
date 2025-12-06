@@ -66,7 +66,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function update(CategoryRequest $request, Category $category, CategoryService $categoryService): RedirectResponse
+    public function update(CategoryRequest $request, Category $category, CategoryService $categoryService)
     {
         // check permission of current user
         isAuthorized('category edit');

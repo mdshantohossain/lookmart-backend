@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductCreateRequest extends FormRequest
 {
@@ -25,43 +26,53 @@ class ProductCreateRequest extends FormRequest
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
             'name' => 'required',
-            'regular_price' => 'nullable|numeric|min:0|max:999999999.99',
+            'original_price' => 'nullable|numeric|min:0|max:999999999.99',
             'selling_price' => 'required|numeric|min:0|max:999999999.99',
-            'suggest_price' => 'nullable|string',
             'buy_price' => 'nullable|string',
-            'discount' => 'nullable|string',
-            'cj_id' => 'string|nullable',
-            'short_description' => 'string|required',
-            'long_description' => 'string|nullable',
+            'discount' => ['nullable', 'regex:/^\d{1,3}%$/'],
+            'remove_other_image' => 'nullable|array',
+            'remove_other_image.*' => 'in:0,1',
+            'remove_variants' => 'nullable|array',
+            'remove_variants.*' => 'in:0,1',
+            'short_description' => 'required|string',
+            'long_description' => 'nullable|string',
             'tags' => 'string|nullable',
-            'sizes' => 'string|nullable',
             'variants_title' => 'string|nullable',
-            'sku' => 'required|string|unique:products,sku',
             'status' => 'required|in:0,1',
             'meta_title' => 'string|nullable',
             'meta_description' => 'string|nullable',
             'product_owner' => 'required|in:0,1,2',
-            'is_featured' => 'string|nullable',
-            'is_trending' => 'string|nullable',
+            'product_policy_id.*' => "nullable|numeric|exists:product_policies,id",
+            'is_featured' => 'nullable|in:0,1',
+            'is_trending' => 'nullable|in:0,1',
             'variants' => 'nullable|array',
-
+            'variants.*.sku' => 'nullable|string',
+            'variants.*.price' => 'nullable|numeric',
+            'variants.*.image' => 'nullable'
         ];
 
         if($this->isMethod('put') || $this->isMethod('patch')) {
-            $rules['main_image'] = 'nullable';
+            $rules['thumbnail'] = 'nullable|file|mimetypes:image/*,video/*|mimes:jpg,jpeg,png,webp,mp4,mov,avi,wmv';
             $rules['other_images'] = 'nullable|array';
-            $rules['color_images'] = 'nullable|array';
+            $rules['sku'] = ['required', 'string', Rule::unique('products', 'sku')->ignore($this->route('product')?->id)];
+            $rules['cj_id'] = ['nullable', 'string', Rule::unique('products', 'cj_id')->ignore($this->route('product')?->id)];
+
         } else {
-            $rules['main_image'] = 'required';
+            if($this->filled('cj_id')) {
+                $rules['thumbnail'] = 'required|string';
+
+            } else {
+                $rules['thumbnail'] = 'required|file|mimetypes:image/*,video/*|mimes:jpg,jpeg,png,webp,mp4,mov,avi,wmv';
+            }
+
+            $rules['cj_id'] = 'nullable|string|unique:products,cj_id';
             $rules['other_images'] = 'required|array';
-            $rules['color_images'] = 'required|array';
+            $rules['sku'] = ['required', 'string'];
         }
 
-        if ($this->input('product_owner') == '0') {
-            $rules['quantity'] = 'required|string';
-        } else {
-            $rules['quantity'] = 'nullable|string';
-        }
+        $rules['quantity'] = ($this->product_owner == '0')
+            ? 'required|integer|min:0'
+            : 'nullable|integer|min:0';
 
         return $rules;
     }
@@ -69,9 +80,9 @@ class ProductCreateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category_id.required' => 'Category is required',
-            'sub_category_id.required' => 'Sub Category is required',
-            'other_images.required' => 'Other image is required',
+            'category_id.required' => 'Category field is required',
+            'sub_category_id.required' => 'Sub category field  is required',
+            'other_images.required' => 'Gallery images field is required',
         ];
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Admin\Product;
 use App\Models\Review;
 use App\Services\ReviewService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ReviewController extends Controller
@@ -17,7 +18,7 @@ class ReviewController extends Controller
             'products' =>  Product::whereHas('reviews')
                 ->with('reviews', 'reviews.user')
                 ->latest()
-                ->get(['id', 'sku', 'name', 'main_image']),
+                ->get(['id', 'sku', 'name', 'thumbnail']),
         ]);
     }
 
@@ -26,13 +27,12 @@ class ReviewController extends Controller
         // check permission of request user
         isAuthorized('review create');
 
-        return view('admin.review.create', [
-            'products' => Product::select(['id', 'name', 'main_image'])->latest()->get()
-        ]);
+        return view('admin.review.create');
     }
 
     public function store(ReviewRequest $request, ReviewService $reviewService)
     {
+//      return $request;
         $review = $reviewService->updateOrCreate($request->validated());
 
         if(!$review) {
@@ -42,27 +42,31 @@ class ReviewController extends Controller
         return redirect()->route('reviews.index')->with('success', 'Review created successful');
     }
 
-    public function show(Review $review): View
+    public function show(Product $product): View
     {
         // check permission of request user
         isAuthorized('review show');
 
-        return view('admin.review.show', compact('review'));
+        $product->load('reviews', 'reviews.user', 'reviews.images');
+
+        return view('admin.review.detail', compact('product'));
     }
 
-    public function edit(Review $review): View
+    public function edit(Product $product)
     {
         // check permission of request user
         isAuthorized('review edit');
 
-        return view('admin.review.edit', compact('review'));
+        $product->load('reviews', 'reviews.user');
+
+        return view('admin.review.edit', compact('product'));
     }
 
     public function update(ReviewRequest $request, Review $review, ReviewService $reviewService): RedirectResponse
     {
         isAuthorized('review update');
 
-        $review = $reviewService->updateOrCreate($request->validated(), $review);
+        $review = $reviewService->updateOrCreate($request->validated());
 
         if(!$review) {
             return back()->with('error', 'Review could not be updated');
@@ -71,12 +75,20 @@ class ReviewController extends Controller
         return redirect()->route('reviews.index')->with('success', 'Review updated successful');
     }
 
-    public function destroy(Review $review): RedirectResponse
+    public function destroy(Product $product): RedirectResponse
     {
         // check permission of request user
         isAuthorized('review destroy');
 
-        $review->delete();
+        foreach ($product->reviews as $review) {
+            foreach ($review->images as $image) {
+                if($image->image) {
+                    removeImage($image->image);
+                }
+            }
+
+            $review->delete();
+        }
 
         return back()->with('success', 'Review created successful');
     }

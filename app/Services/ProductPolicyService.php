@@ -13,7 +13,7 @@ class ProductPolicyService
         try {
             $inputs = collect($data)->except('_token', 'remove_image')->toArray();
 
-            if( !isset($data['image']) && $data['remove_image'] == '1') {
+            if( !empty($data['remove_image']) && $data['remove_image'] == '1') {
                 $inputs['image'] = null;
             }
 
@@ -26,7 +26,7 @@ class ProductPolicyService
                 }
 
                 // get new url after save image
-                $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/image/product-policy-images/');
+                $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/uploaded-images/product-policy-images/');
             }
 
             $inputs['slug'] = generateUniqueSlug($inputs['policy']);

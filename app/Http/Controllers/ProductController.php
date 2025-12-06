@@ -3,23 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductCreateRequest;
-use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Admin\Category;
 use App\Models\Admin\Product;
 use App\Models\Admin\SubCategory;
 use App\Models\OtherImage;
+use App\Models\ProductPolicy;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
-use function PHPUnit\Framework\logicalOr;
-use function React\Promise\all;
 
 class ProductController extends Controller
 {
+    // get exclusive section product on frontend
     public function getExclusiveProducts(): JsonResponse
     {
         $products = Product::with('variants')
@@ -33,6 +30,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
+    // get tending section product on frontend
     public function getTrendingProducts(): JsonResponse
     {
         $products = Product::with('variants')
@@ -50,7 +48,7 @@ class ProductController extends Controller
     public function index(): View
     {
         return view('admin.product.index', [
-            'products' => Product::with('category')->latest()->take(20)->get()
+            'products' => Product::with('category')->latest()->get(['name', 'slug', 'thumbnail', 'selling_price', 'category_id', 'status'])
         ]);
     }
 
@@ -62,7 +60,8 @@ class ProductController extends Controller
         return view('admin.product.create', [
             'categories' => Category::where('status',  1)->get(),
             'subCategories' => SubCategory::where('status',  1)->get(),
-            ]);
+            'productPolicies' => ProductPolicy::all(),
+        ]);
     }
 
     public function store(ProductCreateRequest $request, ProductService $productService): RedirectResponse
@@ -70,7 +69,7 @@ class ProductController extends Controller
         // check permission of request user.
         isAuthorized('product create');
 
-        $product = $productService->createOrUpdate($request->all());
+        $product = $productService->updateOrCreate($request->all());
 
         if (!$product) {
             return back()->with('error', 'Product could not be created');
@@ -84,81 +83,36 @@ class ProductController extends Controller
         // check permission of request user
         isAuthorized('product show');
 
-        $product->load(['category', 'subCategory', 'otherImages']);
-
         return view('admin.product.detail', [
-            'product' => $product
+            'product' =>  $product->load('otherImages')
         ]);
     }
 
-    public function edit(Product $product)
+    public function edit(Product $product):  View
     {
         // check permission of request user
         isAuthorized('product edit');
 
-        if (!empty($product->color_images)) {
-            $product->color_images = json_decode($product->color_images, true);
-        }
-
         return view('admin.product.edit', [
             'categories' => Category::where('status',  1)->get(),
             'subCategories' => SubCategory::where('status',  1)->get(),
-            'product' => $product->load('variants')
+            'product' => $product->load(['variants', 'otherImages']),
+            'productPolicies' => ProductPolicy::all(),
         ]);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(ProductCreateRequest $request, Product $product, ProductService $productService): RedirectResponse
     {
-        return $request;
         // check permission of current user
         isAuthorized('product edit');
 
-        try {
-            $inputs = $request->only([
-                'category_id',
-                'sub_category_id',
-                'name',
-                'regular_price',
-                'selling_price',
-                'cj_id',
-                'buy_price',
-                'sku',
-                'discount',
-                'quantity',
-                'short_description',
-                'long_description',
-                'status'
-            ]);
+        $storedProduct = $productService->updateOrCreate($request->all(), $product);
 
-            if ($request->hasFile('main_image')) {
-                if(file_exists($product->main_image)) {
-                    unlink($product->main_image);
-                }
-                $inputs['main_image'] = $this->getImageUrl($request->file('main_image'), 'admin/assets/images/product-images/');
-            }
-
-            $product->update($inputs);
-
-            if ($request->hasFile('other_images')) {
-                foreach ($product->otherImages  as $otherImage) {
-                    if (file_exists($otherImage)) {
-                        unlink($otherImage);
-                    }
-                    $otherImage->delete();
-                }
-                foreach ($request->file('other_images') as $otherImage) {
-                    OtherImage::create([
-                        'product_id' => $product->id,
-                        'image' => $this->getImageUrl($otherImage, 'admin/assets/images/other-images/')
-                    ]);
-                }
-            }
-
-            return redirect('products')->with('success', 'Product updated successfully');
-
-        } catch (\Exception $exception) {
-            return redirect()->back()->with('error', $exception);
+        if (!$storedProduct) {
+            return back()->with('error', 'Product could not be updated');
         }
+
+        return redirect('/products')->with('success', 'Product updated successfully');
     }
 
     public function destroy(Product $product): RedirectResponse
@@ -167,12 +121,21 @@ class ProductController extends Controller
         isAuthorized('product destroy');
 
         try {
+            // delete products all variants with remove image
+            foreach ($product->variants as $variant) {
+                if($variant->image) {
+                    removeImage($variant->image);
+                }
+                $variant->delete();
+            }
 
+            // delete product gallery images
             $otherImages = OtherImage::where('product_id', $product->id)->get();
+
             foreach ($otherImages as $otherImage) {
-                if (file_exists($otherImage->image))
+                if ($otherImage->image)
                 {
-                    unlink($otherImage->image);
+                    removeImage($otherImage->image);
                 }
                 $otherImage->delete();
             }
@@ -291,5 +254,30 @@ class ProductController extends Controller
                 'code' => 500
             ]);
         }
+    }
+
+    // product search for review
+    public function search(Request $request): JsonResponse
+    {
+        $search = $request->input('search');
+
+        if(empty($search)){
+            return response()->json([]);
+        }
+
+        $products = Product::where('name', 'LIKE', "%{$search}%")
+            ->orWhere('sku', 'LIKE', "%{$search}%")
+            ->select('id', 'name', 'sku', 'thumbnail') // Adjust 'thumbnail' to your actual column name (e.g., main_image)
+            ->limit(10)
+            ->latest()
+            ->get();
+
+        // Map image path to full URL if necessary
+        $products->transform(function($product){
+            $product->image_url = asset($product->thumbnail);
+            return $product;
+        });
+
+        return response()->json($products);
     }
 }

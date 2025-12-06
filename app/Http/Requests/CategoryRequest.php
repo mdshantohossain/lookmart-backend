@@ -22,19 +22,20 @@ class CategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        if ($this->isMethod('post')) {
-            // create
-            $uniqueRule = Rule::unique('categories', 'name');
-        } else {
-            // update
-            $uniqueRule = Rule::unique('categories', 'name')->ignore($this->route('category')?->id);
-        }
-
-        return [
-            'name' => [ 'required', $uniqueRule],
+        $rules = [
             'image' => 'image|nullable|mimes:jpeg,png,jpg,gif,svg',
             'status' => [ 'required', Rule::in([0, 1])],
             'remove_image' => 'numeric|nullable',
         ];
+
+        if ($this->isMethod('put')) {
+            // update
+            $rules['name'] = ['required', Rule::unique('categories', 'name')->ignore($this->route('category')?->id)];
+        } else {
+            // create
+            $rules['name'] = [ 'required', Rule::unique('categories', 'name')];
+        }
+
+        return $rules;
     }
 }

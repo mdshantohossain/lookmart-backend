@@ -26,12 +26,15 @@ class ReviewRequest extends FormRequest
             'reviews' => 'required|array|min:1',
             'reviews.*.name' => 'required|min:3|max:28',
             'reviews.*.rating' => 'required|min:1|max:5',
-            'reviews.*.message' => 'required|min:3',
+            'reviews.*.images' => 'nullable|',
+            'reviews.*.message' => 'nullable|min:3',
             'reviews.*.date' => 'nullable|date',
         ];
 
         if($this->is('api/*')) {
             $rules['user_id'] = 'required|exists:users,id';
+        } else {
+            $rules['user_id'] = 'nullable';
         }
 
         return $rules;

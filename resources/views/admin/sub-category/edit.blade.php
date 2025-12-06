@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="">Sub-category edit form</h4>
+                        <h4 class="">Sub category edit form</h4>
                         <a href="{{ route('sub-categories.index') }}" class="btn btm-sm btn-primary waves-effect waves-light">
                             Back
                         </a>
@@ -17,6 +17,8 @@
                         @csrf
                         @method('PUT')
                         <div class="mb-3">
+                            <label for="">Select category</label>
+
                             <select name="category_id" class="form-select">
                                 <option value="">Select category</option>
                                 @forelse($categories as $category)

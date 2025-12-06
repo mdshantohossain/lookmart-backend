@@ -30,11 +30,11 @@ class UserRequest extends FormRequest
         if($this->isMethod('put') || $this->isMethod('patch')) {
             $rules['email'][] = Rule::unique('users', 'email')->ignore($this->route('user')?->id);
             $rules['phone'][] = Rule::unique('users', 'phone')->ignore($this->route('user')?->id);
-            $passwordRule = 'nullable|min:6';
+            $passwordRule = 'nullable|min:8';
         } else {
             $rules['email'][] = 'unique:users,email';
             $rules['phone'][] = 'unique:users,phone';
-            $passwordRule = 'required|min:6';
+            $passwordRule = 'required|min:8';
         }
 
         return [

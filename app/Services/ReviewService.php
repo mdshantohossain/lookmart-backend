@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Review;
+use App\Models\ReviewImage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -13,23 +14,41 @@ class ReviewService
      * @param Review|null $review
      * @return Review|null
      */
-    public function updateOrCreate(array $data, ?Review $review = null): bool|null
+    public function updateOrCreate(array $data): bool
     {
         DB::beginTransaction();
 
         try {
-            foreach ($data['reviews'] as $value) {
-                DB::table('reviews')->updateOrInsert([
-                    'id' => $value['id'] ?? null,
+            foreach ($data['reviews'] as $review) {
+
+               $storedReview = Review::updateOrCreate([
+                    'id' => $review['id'] ?? null,
                 ], [
                   'product_id' => $data['product_id'],
                   'user_id' => $data['user_id'] ?? null,
-                  'name' => $value['name'],
-                  'message' => $value['message'] ?? now(),
-                  'rating' => $value['rating'],
+                  'name' => $review['name'],
+                  'message' => $review['message'],
+                  'rating' => $review['rating'],
                   'slug' => Str::random(64),
-                  'published_at' => $value['date'],
+                  'published_at' => $review['date'],
                 ]);
+
+                // handle review images
+                if (!empty($review['images'])) {
+                    foreach ($review['images'] as $image) {
+
+                        // UploadedFile case handling
+                        $path = getImageUrl(
+                            $image,
+                            'admin/assets/uploaded-images/review-images'
+                        );
+
+                        ReviewImage::create([
+                            'review_id' => $storedReview->id,
+                            'image' => $path,
+                        ]);
+                    }
+                }
             }
 
             DB::commit();
@@ -38,7 +57,7 @@ class ReviewService
         } catch (\Exception $e) {
             DB::rollBack();
             logger()->error($e);
-            return null;
+            return false;
         }
     }
 }

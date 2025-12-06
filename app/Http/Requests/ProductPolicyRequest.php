@@ -29,7 +29,7 @@ class ProductPolicyRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:255',
-                Rule::unique('product_policies', 'policy')->ignore($this->route('product_policy')->id),
+                Rule::unique('product_policies', 'policy')->ignore($this->route('product_policy')?->id),
             ],
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
         ];

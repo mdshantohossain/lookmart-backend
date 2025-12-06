@@ -22,7 +22,7 @@
                                 <th class="align-middle">Sl.</th>
                                 <th class="align-middle">Category Name</th>
                                 <th class="align-middle">Name</th>
-                                <th class="align-middle">Price</th>
+                                <th class="align-middle">Selling Price</th>
                                 <th class="align-middle">Image</th>
                                 <th class="align-middle">Status</th>
                                 @canany(['product destroy', 'product edit', 'product show'])
@@ -32,14 +32,20 @@
                             </thead>
                             <tbody>
 
-                            @forelse($products as $product)
+                            @foreach($products as $product)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $product->category->name }}</td>
-                                    <td>{{ truncateString($product->name, 25) }}</td>
+                                    <td>{{ truncateString($product->name, 35) }}</td>
                                     <td>${{ $product->selling_price }}</td>
                                     <td>
-                                        <img src="{{ $product->main_image }}" height="80" width="100" class="rounded-2" alt="{{ $product->name }}" />
+                                        @if(getFileType($product->thumbnail) === 'video')
+                                            <video height="80" width="100" controls class="rounded-2">
+                                                <source src="{{ $product->thumbnail }}" />
+                                            </video>
+                                        @else
+                                            <img src="{{ $product->thumbnail }}" height="80" width="100" class="rounded-2" alt="thumbnail image" />
+                                        @endif
                                     </td>
                                     <td>
                                         {!! getStatus($product->status, 'catalog') !!}
@@ -71,13 +77,8 @@
                                         </td>
                                     @endcanany
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9">
-                                        <p class="text-center fs-5 mt-4">Doesn't have any product </p>
-                                    </td>
-                                </tr>
-                            @endforelse
+
+                                @endforeach
 
                             </tbody>
                         </table>

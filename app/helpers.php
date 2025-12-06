@@ -18,6 +18,25 @@ if(!function_exists('isAuthorized')) {
     }
 }
 
+// get file type
+
+if(!function_exists('getFileType')) {
+    function getFileType(string $url): string
+    {
+        $extension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+
+        if (in_array($extension, ['mp4', 'mov', 'avi', 'wmv'])) {
+            $type = "video";
+        } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+            $type = "image";
+        } else {
+            $type = "unknown";
+        }
+
+        return $type;
+    }
+}
+
 // status generate
 if (!function_exists('getStatus')) {
     /**
@@ -59,18 +78,20 @@ if (!function_exists('getStatus')) {
 }
 
 if(!function_exists('removeImage')) {
-    function removeImage(string $url)
+    function removeImage(string $url): void
     {
-
+        if(file_exists($url)) {
+            unlink($url);
+        }
     }
 }
 
 if(!function_exists('getImageUrl')) {
-    function getImageUrl(object $image, string $path = 'images'): string
+    function getImageUrl(object $file, string $path = 'uploaded'): string
     {
-        $imageName = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
+        $imageName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
 
-        $image->move($path,'/'. $imageName);
+        $file->move($path,'/'. $imageName);
         // Return the URL accessible from browser
         return asset($path. '/'. $imageName);
     }
