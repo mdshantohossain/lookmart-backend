@@ -7,15 +7,27 @@ use App\Models\Admin\Category;
 use App\Models\Admin\SubCategory;
 use App\Services\SubCategoryService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\View\View;
 
 class SubCategoryController extends Controller
 {
+    protected string $redisKey = 'subCategory', $redisField = 'all';
+
     public function index(): View
     {
-        return view('admin.sub-category.index', [
-            'subCategories' => SubCategory::with('category')->get()
-        ]);
+        $cached = Redis::hget($this->redisKey, $this->redisField);
+
+        if($cached) {
+            $subCategories = json_decode($cached);
+        } else {
+            $subCategories = SubCategory::with('category')->get();
+
+            // caching in redis
+            Redis::hset($this->redisKey, $this->redisField, json_encode($subCategories));
+        }
+
+        return view('admin.sub-category.index', compact('subCategories'));
     }
 
     public function create(): View
@@ -36,6 +48,9 @@ class SubCategoryController extends Controller
         $subCategory = $subCategoryService->updateOrCreate($request->validated());
 
         if (!$subCategory) return back()->with('error', 'Sub category not created');
+
+        // updating redis cache after create
+        $this->updateRedisCacheForSubCategory();
 
         return  redirect('/sub-categories')->with('success', 'Sub category created successfully');
     }
@@ -60,6 +75,9 @@ class SubCategoryController extends Controller
 
         if(!$subCategory) return back()->with('error', 'Sub category not created');
 
+        // updating redis cache after update
+        $this->updateRedisCacheForSubCategory();
+
         return redirect('/sub-categories')->with('success', 'Sub category updated successfully');
 
     }
@@ -71,10 +89,19 @@ class SubCategoryController extends Controller
         try {
             $subCategory->delete();
 
+            // updating redis cache after delete
+            $this->updateRedisCacheForSubCategory();
+
             return back()->with('success', 'Sub category deleted successfully');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', $exception->getMessage());
         }
+    }
+
+    public function updateRedisCacheForSubCategory(): void
+    {
+        $subCategories = SubCategory::with('category')->get();
+        Redis::hset($this->redisKey, $this->redisField, json_encode($subCategories));
     }
 
     public function getSubCategories(int $categoryId)

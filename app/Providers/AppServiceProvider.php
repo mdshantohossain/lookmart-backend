@@ -10,6 +10,7 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -48,10 +49,18 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
+            $cached = Redis::hget('app', 'app');
+
+            if($cached) {
+                $app = json_decode($cached, true);
+            } else {
+                $app = AppManage::first();
+
+                Redis::hset('app', 'app', json_encode($app));
+            }
+
             $view->with([
-                'globalCategories' => Category::where('status', 1)->with('subCategories')->get(),
-                'wishlistCounts' => Wishlist::where('user_id', auth()->id())->count(),
-                'app' => AppManage::first(),
+                'app' => $app,
             ]);
         });
     }

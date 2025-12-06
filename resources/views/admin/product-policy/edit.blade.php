@@ -27,7 +27,7 @@
 
                         <div class="mb-3">
                             <label for="formrow-firstname-input" class="form-label">Image</label>
-                            <input type="file" class="form-control" value="{{ old('image') }}" name="image"  />
+                            <input type="file" class="form-control" accept="image/*" value="{{ old('image') }}" name="image"  />
                             @error('image')
                             <div class="text-danger">{{ $message }}</div>
                             @enderror
