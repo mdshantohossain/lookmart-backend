@@ -19,6 +19,10 @@ class  CategoryService
             }
 
             if(! empty($inputs['image'])) {
+                if($category->image) {
+                    removeImage($category->image);
+                }
+
                 $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/uploaded-images/category-images/');
             }
 
