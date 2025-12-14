@@ -24,4 +24,3 @@ yarn-error.log
 /images
 /public/admin/assets/uploaded-images
 /public/assets
-/bootstrap/cache/*.php
