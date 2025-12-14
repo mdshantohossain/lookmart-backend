@@ -10,36 +10,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: mbstring, pdo, mysql
+          tools: composer:v2
 
-      # 3️⃣ Prepare directory
       - name: Prepare Laravel directories
         run: |
           mkdir -p bootstrap/cache
           mkdir -p storage/framework/{cache,sessions,views}
+          touch bootstrap/cache/packages.php
+          touch bootstrap/cache/services.php
           chmod -R 775 bootstrap/cache storage
 
-      # 3️⃣ Install dependencies
       - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install --no-dev --optimize-autoloader --no-interaction
 
-      # 4️⃣ Run tests (optional)
       - name: Run Tests
         run: php artisan test
         continue-on-error: true
 
-      # 5️⃣ Upload to shared hosting (FTP)
       - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
