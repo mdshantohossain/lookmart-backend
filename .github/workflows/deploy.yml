@@ -41,6 +41,8 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
+          port: 21
+          source: "."
           server-dir: /home/lookmart/admin.lookmartbd.com/
           exclude: |
             **/.git*
