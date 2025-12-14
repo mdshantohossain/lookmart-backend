@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Review;
 
 return new class extends Migration
 {
@@ -11,12 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('review_images', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->text('image')->nullable();
-            $table->string('slug')->unique();
-            $table->tinyInteger('status')->default(1);
+            $table->foreignIdFor(Review::class)->constrained()->cascadeOnDelete();
+            $table->text('image');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('review_images');
     }
 };

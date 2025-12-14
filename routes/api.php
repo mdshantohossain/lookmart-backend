@@ -20,7 +20,7 @@ Route::get('/categories', [CategoryController::class, 'getAllCategories']);
 Route::get('/exclusive-products', [ProductController::class, 'getExclusiveProducts']);
 Route::get('/trending-products', [ProductController::class, 'getTrendingProducts']);
 Route::get('/category-products', [ProductController::class, 'getCategoryProducts']);
-Route::get('/sub-category-products/{slug}', [ProductController::class, 'getSubCategoryProducts']);
+Route::get('/sub-category-products', [ProductController::class, 'getSubCategoryProducts']);
 Route::get('/search-products', [SearchController::class, 'getSearchProducts']);
 
 // auth

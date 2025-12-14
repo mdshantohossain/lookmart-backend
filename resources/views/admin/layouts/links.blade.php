@@ -30,10 +30,10 @@
 
 <style>
     /* Customize toastr success */
-    /*.toast-success {*/
-    /*    background-color: #556ee6 !important; !* Bootstrap green *!*/
-    /*    font-size: 15px;*/
-    /*}*/
+    .toast-success {
+        background-color: #556ee6 !important; /* Bootstrap green */
+        font-size: 15px;
+    }
 
     /* Customize toastr error */
     .toast-error {
@@ -53,6 +53,7 @@
     .bg-custom-checkbox {
         background-color: #edf3fb;
     }
+    @stack('css')
 </style>
 
 @stack('links')

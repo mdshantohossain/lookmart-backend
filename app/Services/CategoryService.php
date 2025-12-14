@@ -14,17 +14,31 @@ class  CategoryService
         try {
             $inputs = collect($data)->except(['remove_image', '_method'])->toArray();
 
-            if( !isset($data['image']) && $data['remove_image'] == '1') {
+            if( !empty($data['remove_image']) && $data['remove_image'] == '1') {
                 $inputs['image'] = null;
             }
 
             if(! empty($inputs['image'])) {
-                $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/images/category-images/');
+                if($category?->image) {
+                    removeImage($category->image);
+                }
+
+                $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/uploaded-images/category-images/');
             }
 
+
+            // Slug
             $inputs['slug'] = Str::slug($inputs['name']);
+
+            // Create or update inside transaction
+            if ($category) {
+                $category->update($inputs);
+            } else {
+                $category = Category::create($inputs);
+            }
+
             DB::commit();
-            return $category ? tap($category)->update($inputs) : Category::create($inputs);
+            return $category;
         } catch (\Exception $e) {
             DB::rollBack();
             logger()->error($e);

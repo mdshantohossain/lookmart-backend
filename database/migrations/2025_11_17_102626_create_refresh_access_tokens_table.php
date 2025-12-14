@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\User;
 
 return new class extends Migration
 {
@@ -11,12 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('refresh_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->text('image')->nullable();
-            $table->string('slug')->unique();
-            $table->tinyInteger('status')->default(1);
+            $table->foreignIdFor(User::class)->unique()->constrained()->cascadeOnDelete();
+            $table->text('refresh_token');
+            $table->text('expires_in');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('refresh_access_tokens');
     }
 };

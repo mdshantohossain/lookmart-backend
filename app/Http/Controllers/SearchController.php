@@ -19,7 +19,14 @@ class SearchController extends Controller
 
         try {
             $query = $request->query('query');
-            $products = Product::where('name', 'like', "%$query%")->get();
+
+            $products = Product::with(['variants'])
+                ->select(['id', 'name', 'slug', 'thumbnail', 'selling_price', 'original_price', 'discount']) // add more field if needed
+                ->where('name', 'like', "%$query%")
+                ->withCount('reviews')
+                ->withAvg('reviews', 'rating')
+                ->where('status', 1)
+                ->get();
 
             return response()->json([
                 'success' => true,

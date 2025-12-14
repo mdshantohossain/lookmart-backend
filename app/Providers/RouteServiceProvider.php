@@ -39,6 +39,10 @@ class RouteServiceProvider extends ServiceProvider
             return SubCategory::where('slug', $slug)->firstOrFail();
         });
 
+        Route::bind('review', function (int $id) {
+            return Product::select(['id', 'name', 'thumbnail', 'sku'])->where('id', $id)->firstOrFail();
+        });
+
         Route::bind('order', function (string $slug) {
             return Order::where('slug', $slug)->firstOrFail();
         });

@@ -11,24 +11,48 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
+    protected string $redisKey = 'category', $redisField = 'all';
     public function getAllCategories()
     {
-        $category = Category::with(['subCategories', 'products' => function ($query) {
-            $query->latest()->take(6);
-        }])->where('status', 1)->get();
-        return response()->json($category);
+        $redisKey = 'get-all-categories';
+        $redisField = 'all';
+
+        $cached = Redis::hget($redisKey, $redisField);
+
+        if ($cached) {
+            $categories = json_decode($cached);
+        } else {
+            $categories = Category::with(['subCategories', 'products' => function ($query) {
+                $query->latest()->take(6);
+            }])->where('status', 1)->get();
+
+            // caching
+            Redis::hset($this->redisKey, $redisKey, json_encode($categories));
+        }
+
+        return response()->json($categories);
     }
 
     public function index(): View
     {
-        return view('admin.category.index', [
-            'categories' => Category::all()
-        ]);
+        $cached = Redis::hget($this->redisKey, $this->redisField);
+
+        if($cached) {
+            $categories = json_decode($cached);
+        } else {
+            $categories = Category::withCount('subCategories')->latest()->get();
+
+            // cache to redis
+            Redis::hset($this->redisKey, $this->redisField, json_encode($categories));
+        }
+
+        return view('admin.category.index', compact('categories'));
     }
 
     public function create(): View
@@ -49,6 +73,9 @@ class CategoryController extends Controller
 
             if (!$category) return back()->with('error', 'category not created');
 
+            // updating redis cache after create
+            $this->updateRedisCacheForCategory();
+
             return redirect('/categories')->with('success', 'Category created successfully');
 
         } catch (\Exception $exception) {
@@ -66,7 +93,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function update(CategoryRequest $request, Category $category, CategoryService $categoryService): RedirectResponse
+    public function update(CategoryRequest $request, Category $category, CategoryService $categoryService)
     {
         // check permission of current user
         isAuthorized('category edit');
@@ -75,6 +102,9 @@ class CategoryController extends Controller
            $category = $categoryService->updateOrCreate($request->validated(), $category);
 
            if(! $category) return back()->with('error', 'category not updated');
+
+            // updating redis cache after updating
+            $this->updateRedisCacheForCategory();
 
             return redirect('/categories')->with('success', 'Category updated successfully');
         } catch (\Exception $exception) {
@@ -87,12 +117,24 @@ class CategoryController extends Controller
         isAuthorized('category destroy');
 
         try {
+            if($category->image) {
+                removeImage($category->image);
+            }
             $category->delete();
+
+            // updating redis cache after delete
+            $this->updateRedisCacheForCategory();
 
             return back()->with('success', 'Category deleted successfully');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', $exception);
         }
+    }
+
+    public function updateRedisCacheForCategory(): void
+    {
+        $categories = Category::withCount('subCategories')->latest()->get();
+        Redis::hset($this->redisKey, $this->redisField, json_encode($categories));
     }
 
     public function subCategoryProducts(SubCategory $subCategory): View

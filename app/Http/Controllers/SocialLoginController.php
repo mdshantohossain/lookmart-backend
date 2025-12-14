@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialLoginController extends Controller
 {
-    public function socialLogin(Request $request)
+    public function socialLogin(Request $request): JsonResponse
     {
         $provider = $request->provider;
         $token = $request->token;

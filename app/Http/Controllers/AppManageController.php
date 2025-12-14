@@ -24,7 +24,7 @@ class AppManageController extends Controller
         foreach (['logo', 'favicon'] as $fileKey) {
             if ($request->hasFile($fileKey)) {
                 if($appManager && file_exists($appManager->$fileKey)) {
-                    unlink($appManager->$fileKey);
+                    removeImage($appManager->$fileKey);
                 }
 
                 $inputs[$fileKey] = getImageUrl($request->file($fileKey), 'images/app-manage');

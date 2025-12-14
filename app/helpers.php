@@ -5,9 +5,8 @@ use App\Models\Wishlist;
 use App\Models\ShippingCharge;
 use App\Models\Admin\Product;
 use Illuminate\Support\Str;
+use Intervention\Image\Laravel\Facades\Image;
 
-
-use Illuminate\Support\Facades\Auth;
 
 // check authorization
 if(!function_exists('isAuthorized')) {
@@ -59,20 +58,48 @@ if (!function_exists('getStatus')) {
 }
 
 if(!function_exists('removeImage')) {
-    function removeImage(string $url)
+    function removeImage(string $url): void
     {
+        // Remove domain from URL → get relative path
+        $relativePath = str_replace(asset(''), '', $url);
 
+        // Convert to full server path
+        $fullPath = public_path($relativePath);
+
+        if (file_exists($fullPath)) {
+            unlink($fullPath);
+        }
     }
 }
 
 if(!function_exists('getImageUrl')) {
-    function getImageUrl(object $image, string $path = 'images'): string
+    function getImageUrl(object $file, string $path = 'uploaded'): string
     {
-        $imageName = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
+        // ensure directory exists
+        if (!file_exists(public_path($path))) {
+            mkdir(public_path($path), 0755, true);
+        }
 
-        $image->move($path,'/'. $imageName);
-        // Return the URL accessible from browser
-        return asset($path. '/'. $imageName);
+        $extension = strtolower($file->getClientOriginalExtension());
+        $filename = uniqid() . '_' . time() . '.' . $extension;
+        $fullPath = $path . '/' . $filename;
+
+        // IMAGE UPLOAD + RESIZE
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+
+            // Read image
+            $image = Image::read($file->getRealPath())->resize(400, 300);
+
+            // Save with 90% quality
+            $image->save($fullPath, quality: 90);
+
+            return asset("$path/$filename");
+        }
+
+        // OTHER FILE TYPE
+        $file->move($path, $filename);
+
+        return asset("$path/$filename");
     }
 }
 

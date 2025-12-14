@@ -48,7 +48,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        {{ count($category->subCategories) }}
+                                        {{ $category->sub_categories_count }}
                                     </td>
                                     <td>
                                         {!! getStatus($category->status, 'catalog') !!}

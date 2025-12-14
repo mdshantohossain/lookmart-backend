@@ -22,7 +22,7 @@ class PermissionRequest extends FormRequest
      */
     public function rules(): array
     {
-        if($this->isMethod('post')) {
+        if($this->isMethod('post') || $this->isMethod('put')) {
             $rule = Rule::unique('permissions', 'name');
         } else {
             $rule = Rule::unique('permissions', 'name')->ignore($this->route('permission')?->id);
