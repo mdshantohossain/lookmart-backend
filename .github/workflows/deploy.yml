@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -20,6 +22,16 @@ jobs:
           extensions: mbstring, pdo, mysql
           tools: composer:v2
 
+      # 3️⃣ Cache Composer dependencies to speed up builds
+      - name: Cache Composer
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      # 4️⃣ Prepare Laravel directories
       - name: Prepare Laravel directories
         run: |
           mkdir -p bootstrap/cache
@@ -28,34 +40,38 @@ jobs:
           touch bootstrap/cache/services.php
           chmod -R 775 bootstrap/cache storage
 
+      # 5️⃣ Install Composer dependencies
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction
 
+      # 6️⃣ Optional: Run tests
       - name: Run Tests
         run: php artisan test
         continue-on-error: true
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      # 7️⃣ Deploy via SFTP to subdomain folder
+      - name: Deploy via SFTP
+        uses: appleboy/scp-action@master
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          port: 21
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
           source: "."
-          server-dir: /home/lookmart/admin.lookmartbd.com/
-          exclude: |
-            **/.git*
-            **/node_modules/**
+          target: "/home/lookmart/admin.lookmartbd.com"
+          rm: false # keep existing files not overwritten by source
 
-      - name: Run post-deploy commands
+      # 8️⃣ Run post-deploy Artisan commands
+      - name: Post-deploy commands
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/user/public_html
+            cd /home/lookmart/admin.lookmartbd.com
             php artisan migrate --force
             php artisan config:clear
             php artisan cache:clear
+            php artisan route:clear
+            php artisan view:clear
