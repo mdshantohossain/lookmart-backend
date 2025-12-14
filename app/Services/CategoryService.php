@@ -19,18 +19,26 @@ class  CategoryService
             }
 
             if(! empty($inputs['image'])) {
-                if($category->image) {
+                if($category?->image) {
                     removeImage($category->image);
                 }
 
                 $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/uploaded-images/category-images/');
             }
 
+
+            // Slug
             $inputs['slug'] = Str::slug($inputs['name']);
 
-            DB::commit();
-            return $category ? tap($category)->update($inputs) : Category::create($inputs);
+            // Create or update inside transaction
+            if ($category) {
+                $category->update($inputs);
+            } else {
+                $category = Category::create($inputs);
+            }
 
+            DB::commit();
+            return $category;
         } catch (\Exception $e) {
             DB::rollBack();
             logger()->error($e);

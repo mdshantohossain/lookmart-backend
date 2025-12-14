@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionsSeeder::class);
 
         $categories = [
-            'Electroncs' => [
+            'Electronics' => [
                 0 => ['name' => 'Mobile Phones'],
                 1 => ['name' => 'Laptops & Computers'],
                 2 => ['name' => 'Headphones'],
@@ -93,30 +93,31 @@ class DatabaseSeeder extends Seeder
 
                 $productImageNo = 240;
 
-                for ($i = 1; $i <= rand(25, 40); $i++) {
-                    $product = Product::create([
-                        'category_id' => $category->id,
-                        'sub_category_id' => $subCategory->id,
-                        'name' => $subCategory->name. ' Product'. $i,
-                        'sku' => strtoupper(Str::random()),
-                        'selling_price' => rand(100, 2000),
-                        'original_price' => rand(100, 2000),
-                        'short_description' => 'this is short product-page description',
-                        'long_description' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt dolorem dolorum enim est eum minus quo repudiandae similique. Dolor dolores earum eum tempora vel. Accusamus animi dolorem excepturi iusto molestias natus nostrum porro quisquam. Commodi consectetur consequatur culpa delectus dolorem doloribus eligendi harum hic iste, iure laborum molestiae obcaecati odit provident repellat soluta, tenetur? Alias atque consectetur corporis culpa cupiditate dicta earum enim ex explicabo facilis fugiat, in magni maxime minus numquam omnis optio possimus quia quidem recusandae reiciendis repellendus sapiente similique soluta temporibus ut vitae! Culpa dignissimos doloremque error fugit illum laudantium numquam rem repudiandae totam velit, voluptatem voluptatibus?',
-                        'thumbnail' => "https://picsum.photos/id/". $productImageNo ."/200/300",
-                        'quantity' => rand(100, 1000),
-                        'slug' => Str::random(60),
-                        'status' => 1,
-                    ]);
+//                for ($i = 1; $i <= rand(25, 40); $i++) {
+//                    $product = Product::create([
+//                        'category_id' => $category->id,
+//                        'sub_category_id' => $subCategory->id,
+//                        'name' => $subCategory->name. ' Product'. $i,
+//                        'sku' => strtoupper(Str::random()),
+//                        'selling_price' => rand(100, 2000),
+//                        'original_price' => rand(100, 2000),
+//                        'short_description' => 'this is short product-page description',
+//                        'long_description' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt dolorem dolorum enim est eum minus quo repudiandae similique. Dolor dolores earum eum tempora vel. Accusamus animi dolorem excepturi iusto molestias natus nostrum porro quisquam. Commodi consectetur consequatur culpa delectus dolorem doloribus eligendi harum hic iste, iure laborum molestiae obcaecati odit provident repellat soluta, tenetur? Alias atque consectetur corporis culpa cupiditate dicta earum enim ex explicabo facilis fugiat, in magni maxime minus numquam omnis optio possimus quia quidem recusandae reiciendis repellendus sapiente similique soluta temporibus ut vitae! Culpa dignissimos doloremque error fugit illum laudantium numquam rem repudiandae totam velit, voluptatem voluptatibus?',
+//                        'image_thumbnail' => "https://picsum.photos/id/". $productImageNo ."/200/300",
+//                        'quantity' => rand(100, 1000),
+//                        'slug' => Str::random(60),
+//                        'status' => 1,
+//                    ]);
+//
+//                    for($j = 1; $j < 5; $j++) {
+//                        OtherImage::create([
+//                            'product_id' => $product->id,
+//                            'image' => "https://picsum.photos/id/". $productImageNo++ ."/200/300",
+//                        ]);
+//                    };
+//                    $productImageNo++;
+//                }
 
-                    for($j = 1; $j < 5; $j++) {
-                        OtherImage::create([
-                            'product_id' => $product->id,
-                            'image' => "https://picsum.photos/id/". $productImageNo++ ."/200/300",
-                        ]);
-                    };
-                    $productImageNo++;
-                }
             }
         }
     }

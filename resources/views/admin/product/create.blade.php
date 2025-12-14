@@ -67,7 +67,7 @@
                                 <label for="categoryId" class="form-label">
                                     Category <span class="text-danger">*</span>
                                 </label>
-                                <select name="category_id" class="form-select" id="categoryId">
+                                <select name="category_id" class="form-select" id="category">
                                     <option value="">Select</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ $category->id == old('category_id') ? 'selected' : '' }}>
@@ -164,28 +164,46 @@
                                 @enderror
                             </div>
 
-                            <!-- Main Image -->
-                            <div class="col-md-4">
-                                <label for="thumbnail" class="form-label">
-                                    Product Thumbnail <span class="text-danger">*</span>
-                                    <sub class="text-sm text-muted">(image/video)</sub>
+                            <!-- Image Thumbnail -->
+                            <div class="col-md-3">
+                                <label for="image_thumbnail" class="form-label">
+                                    Image Thumbnail <span class="text-danger">*</span>
                                 </label>
-                                <input type="file" class="form-control" id="thumbnail" name="thumbnail"
-                                       accept="image/*,video/*" />
-                                @error('thumbnail')
-                                   <span id="thumbnail_error_message" class="text-danger">{{ $message }}</span>
+                                <input type="file" class="form-control" id="image_thumbnail" name="image_thumbnail"
+                                       accept="image/*" />
+                                @error('image_thumbnail')
+                                   <span id="image_thumbnail_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
 
-                                <div id="thumbnail_preview_wrapper" class="mt-2">
-                                    @if(old('thumbnail'))
-                                        <img src="{{ old('thumbnail') }}" style="max-width:120px;" alt="main image" />
-                                        <input type="hidden" name="thumbnail" value="{{ old('thumbnail') }}">
+                                <div id="image_thumbnail_preview_wrapper" class="mt-2">
+                                    @if(old('image_thumbnail'))
+                                        <img src="{{ old('image_thumbnail') }}" style="max-width:120px;" alt="image thumbnail" />
+                                        <input type="hidden" name="image_thumbnail" value="{{ old('image_thumbnail') }}">
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Video Thumbnail -->
+                            <div class="col-md-3">
+                                <label for="video_thumbnail" class="form-label">
+                                    Video Thumbnail
+                                </label>
+                                <input type="file" class="form-control" id="video_thumbnail" name="video_thumbnail"
+                                       accept="video/*" />
+                                @error('video_thumbnail')
+                                    <span id="video_thumbnail_error_message" class="text-danger">{{ $message }}</span>
+                                @enderror
+
+                                <div id="video_thumbnail_preview_wrapper" class="mt-2">
+                                    @if(old('video_thumbnail'))
+                                        <img src="{{ old('video_thumbnail') }}" style="max-width:120px;" alt="video thumbnail" />
+                                        <input type="hidden" name="video_thumbnail" value="{{ old('video_thumbnail') }}">
                                     @endif
                                 </div>
                             </div>
 
                             <!-- Other Images -->
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <label for="other_images" class="form-label">
                                     Gallery Images<span class="text-danger">*</span>
                                 </label>
@@ -455,36 +473,23 @@
 
 @push('scripts')
     <script>
-        $('#main_image').on('change', function () {
-            $('#thumbnail_error_message').empty();
-        });
+        // Reusable error cleaner
+        const clearError = (inputId) => {
+            $(`#${inputId}_error_message`).empty();
+        };
 
-        $('#other_images').on('change', function () {
-            $('#other_image_error_message').empty();
-        });
+        // Apply on inputs (keyup)
+        $('#name, #short_description, #selling_price, #sku, #quantity')
+            .on('keyup', function () {
+                clearError(this.id);
+            });
 
-        $('#short_description').on('keyup', function () {
-            $('#short_description_error_message').empty();
-        })
+        // Apply on file inputs (change)
+        $('#image_thumbnail, #video_thumbnail, #other_images')
+            .on('change', function () {
+                clearError(this.id);
+            });
 
-        $('#selling_price').on('keyup', function () {
-            $('#selling_price_error_message').empty();
-        });
-
-        $('#sku').on('keyup', function () {
-            $('#sku_error_message').empty();
-        });
-
-        $('#quantity').on('keyup', function () {
-            $('#quantity_error_message').empty();
-        });
-
-        $('#categoryId').on('change', function () {
-            $('#category_error_message').empty();
-        });
-        $('#name').on('keyup', function () {
-            $('#name_error_message').empty();
-        })
 
         // Handle Add Variant manually
         $(document).on('click', '#addVariantBtn', function () {
@@ -577,7 +582,7 @@
             };
 
             const resetPreviews = () => {
-                $('#thumbnail_preview_wrapper').empty();
+                $('#image_thumbnail_preview_wrapper').empty();
                 $('.other_image_preview').empty();
             };
 
@@ -637,10 +642,10 @@
                         <p><strong>Suggested Price:</strong> $${product.suggestSellPrice ?? 0}</p>
                     </div>`);
 
-                        // Main Image
+                        // Image thumbnail
                         if (product.productImageSet?.length) {
-                            $('#thumbnail_preview_wrapper').append(
-                                createImagePreview(product.productImageSet[0], 160, 140, "thumbnail")
+                            $('#image_thumbnail_preview_wrapper').append(
+                                createImagePreview(product.productImageSet[0], 160, 140, "image_thumbnail")
                             );
                         }
 
@@ -782,20 +787,17 @@
                 });
             });
 
-            // thumbnail Upload
-            $('#thumbnail').on('change', function () {
+            // image thumbnail upload
+            $('#image_thumbnail').on('change', function () {
                 const file = this.files[0];
-                const previewWrapper = $('#thumbnail_preview_wrapper');
+                const previewWrapper = $('#image_thumbnail_preview_wrapper');
                 previewWrapper.empty();
 
                 if (!file) return;
 
-                const type = file.type;
-
-                if (type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        previewWrapper.html(`
+                const reader = new FileReader();
+                reader.onload = e => {
+                    previewWrapper.html(`
                              <div class="position-relative d-inline-block" style="160px;height:140px;margin:5px;">
                                  <img src="${e.target.result}" class="img-thumbnail rounded-2"
                                       style="width:160px;height:140px;object-fit:cover;border-radius:8px;"
@@ -806,14 +808,20 @@
                                   </i>
                             </div>
                         `);
-                    };
-                    reader.readAsDataURL(file);
-                }
+                };
+                reader.readAsDataURL(file);
+            });
 
-                // if video
-                else if (type.startsWith('video/')) {
-                    const videoURL = URL.createObjectURL(file);
-                    previewWrapper.html(`
+            // video thumbnail upload
+            $('#video_thumbnail').on('change', function () {
+                const file = this.files[0];
+                const previewWrapper = $('#video_thumbnail_preview_wrapper');
+                previewWrapper.empty();
+
+                if (!file) return;
+
+                const videoURL = URL.createObjectURL(file);
+                previewWrapper.html(`
                                 <div class="position-relative d-inline-block" style="width:160px;height:140px;margin:5px;">
                                     <video width="150" height="140" controls class="rounded-2" style="border-radius:8px;">
                                         <source src="${videoURL}" type="${file.type}" />
@@ -825,12 +833,6 @@
                                     </i>
                                 </div>
                     `);
-                }
-
-                // invalid file
-                else {
-                    previewWrapper.html(`<p class="text-danger">Invalid file format</p>`);
-                }
             });
 
             //  Other Images Upload
@@ -844,8 +846,12 @@
 
                 $(`input[value="${imgUrl}"]`).remove();
 
-                if ($(this).parents('#thumbnail_preview_wrapper').length) {
-                    $('#thumbnail').val('');
+                if ($(this).parents('#image_thumbnail_preview_wrapper').length) {
+                    $('#image_thumbnail').val('');
+                }
+
+                if ($(this).parents('#video_thumbnail_preview_wrapper').length) {
+                    $('#video_thumbnail').val('');
                 }
 
                 $(this).closest('div').remove();
@@ -880,7 +886,8 @@
             $('#discount, #original_price').on('input', calculateSellingPrice);
 
             // Dynamic Subcategories
-            $('#categoryId').on('change', function () {
+            $('#category').on('change', function () {
+                clearError(this.id);
                 const categoryId = $(this).val();
                 const subCategorySelect = $('#subCategoryId');
                 if (!categoryId)

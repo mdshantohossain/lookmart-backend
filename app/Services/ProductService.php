@@ -16,20 +16,39 @@ class ProductService
      * @param array $data
      * @param Product|null $product
      * @return Product|null
+     * @throws \Throwable
      */
     public function updateOrCreate(array $data, ?Product $product = null): ?Product
     {
         try {
-            // Handle main image
-            if (!empty($data['thumbnail'])) {
+            // Handle image thumbnail
+            if (!empty($data['image_thumbnail'])) {
 
                 // remove previous thumbnail from store
-                if($product && $data['remove_previous_thumbnail'] == 1) {
-                    removeImage($product->thumbnail);
+                if($product && $data['remove_previous_image_thumbnail'] == 1) {
+                    removeImage($product->image_thumbnail);
                 }
 
-                $thumbnail = is_string($data['thumbnail']) ? $data['thumbnail'] : getImageUrl(
-                    $data['thumbnail'],
+                $image_thumbnail = is_string($data['image_thumbnail']) ? $data['image_thumbnail'] : getImageUrl(
+                    $data['image_thumbnail'],
+                    'assets/images/uploaded-images/product-images'
+                );
+            }
+
+            // remove previous video thumbnail from store
+            if($product && $data['remove_previous_video_thumbnail'] == 1) {
+                if($product->video_thumbnail) {
+                    removeImage($product->video_thumbnail);
+                }
+                 $video_thumbnail = null;
+            } else {
+                $video_thumbnail = $product?->video_thumbnail;
+            }
+
+            // Handle video thumbnail
+            if (!empty($data['video_thumbnail'])) {
+                $video_thumbnail = is_string($data['video_thumbnail']) ? $data['video_thumbnail'] : getImageUrl(
+                    $data['video_thumbnail'],
                     'assets/images/uploaded-images/product-images'
                 );
             }
@@ -47,7 +66,8 @@ class ProductService
                 'discount' => $data['discount'],
                 'quantity' => $data['quantity'],
                 'sku' => $data['sku'],
-                'thumbnail' => $thumbnail ?? $product->thumbnail,
+                'image_thumbnail' => $image_thumbnail ?? $product->image_thumbnail,
+                'video_thumbnail' => $video_thumbnail,
                 'short_description' => $data['short_description'],
                 'long_description' => $data['long_description'],
                 'variants_title' => $data['variants_title'],
@@ -68,6 +88,7 @@ class ProductService
             // Create product
             $storedProduct = $product ? tap($product)->update($inputs) : Product::create($inputs);
 
+            // remove selected other image to remove
             if(!empty($data['remove_other_image'])) {
                 $deleteIds = array_keys(array_filter($data['remove_other_image'], fn($v) => $v == 1));
 
@@ -84,7 +105,7 @@ class ProductService
                 ];
             })->toArray();
 
-            // remove variants
+            // remove variants when product update and select for remove
             if (!empty($data['remove_variants'])) {
 
                 // get IDs to remove
@@ -111,7 +132,7 @@ class ProductService
             $variants = collect($data['variants'] ?? [])->map(function ($variant) use ($storedProduct) {
                 $variantImage = null;
 
-                // removing image logic
+                // remove variant image
                 if (!empty($variant['remove_image']) && $variant['remove_image'] == 1) {
 
                     if (!empty($variant['id'])) {
@@ -129,7 +150,7 @@ class ProductService
                 $processedVariant = [
                     'id' => $variant['id'] ?? null,
                     'product_id' => $storedProduct->id,
-                    'vid' => $variant['vid'] ?? null,
+                    'vid' => $variant['vid'] ?? Str::uuid(),
                     'sku' => $variant['sku'] ?? null,
                     'variant_key' => $variant['variant_key'] ?? null,
                     'buy_price' => $variant['buy_price'] ?? null,
@@ -151,10 +172,10 @@ class ProductService
             DB::commit();
 
             return $storedProduct;
-        } catch (\Exception $exception) {
-            logger($exception->getMessage());
+        } catch (\Throwable $exception) {
             DB::rollBack();
-            return null;
+            report($exception);
+            throw $exception;
         }
     }
 }

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->string('vid')->nullable();
             $table->string('sku')->nullable();
-            $table->string('color')->nullable();
             $table->string('variant_key')->nullable();
             // Images
             $table->text('image')->nullable(); // optional extra images

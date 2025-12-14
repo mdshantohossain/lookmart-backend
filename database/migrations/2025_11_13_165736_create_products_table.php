@@ -27,7 +27,8 @@ return new class extends Migration
             $table->string('sku')->unique();
             $table->string('discount')->nullable();
             $table->integer('quantity')->nullable();
-            $table->text('thumbnail');
+            $table->text('image_thumbnail');
+            $table->text('video_thumbnail')->nullable();
             $table->text('short_description');
             $table->longText('long_description')->nullable();
             $table->integer('total_clicked')->default(0);

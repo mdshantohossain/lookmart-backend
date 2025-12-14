@@ -117,6 +117,9 @@ class CategoryController extends Controller
         isAuthorized('category destroy');
 
         try {
+            if($category->image) {
+                removeImage($category->image);
+            }
             $category->delete();
 
             // updating redis cache after delete

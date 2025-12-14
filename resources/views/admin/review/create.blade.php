@@ -308,7 +308,7 @@
                         reader.onload = function(e) {
                             const wrapper = document.createElement('div');
                             wrapper.classList.add('preview-image-wrapper');
-                            wrapper.innerHTML = `<img src="${e.target.result}"><span class="remove-btn" data-index="${index}">&times;</span>`;
+                            wrapper.innerHTML = `<img src="${e.target.result}" alt="${e.target.result}"/><span class="remove-btn" data-index="${index}">&times;</span>`;
                             previewContainer.appendChild(wrapper);
                         }
                         reader.readAsDataURL(file);
@@ -365,8 +365,8 @@
                     if (products.length === 0) { resultsDropdown.innerHTML = '<div class="p-2 text-center text-muted">No products found</div>'; return; }
                     let html = '';
                     products.forEach(p => {
-                        html += `<div class="product-suggestion d-flex align-items-center p-2 border-bottom" data-id="${p.id}" data-name="${p.name}" data-sku="${p.sku||'N/A'}" data-img="${p.image_url}" style="cursor:pointer;">
-                            <img src="${p.image_url}" class="rounded avatar-xs me-2" style="object-fit:cover;">
+                        html += `<div class="product-suggestion d-flex align-items-center p-2 border-bottom" data-id="${p.id}" data-name="${p.name}" data-sku="${p.sku||'N/A'}" data-img="${p.image_thumbnail}" style="cursor:pointer;">
+                            <img src="${p.image_thumbnail}" class="rounded avatar-xs me-2" style="object-fit:cover;">
                             <div><div class="fw-bold font-size-13 text-dark">${p.name}</div><small class="text-muted">SKU: ${p.sku||'N/A'}</small></div>
                         </div>`;
                     });

@@ -17,24 +17,6 @@ if(!function_exists('isAuthorized')) {
     }
 }
 
-// get file type
-if(!function_exists('getFileType')) {
-    function getFileType(string $url): string
-    {
-        $extension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-
-        if (in_array($extension, ['mp4', 'mov', 'avi', 'wmv'])) {
-            $type = "video";
-        } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-            $type = "image";
-        } else {
-            $type = "unknown";
-        }
-
-        return $type;
-    }
-}
-
 // status generate
 if (!function_exists('getStatus')) {
     /**
@@ -115,7 +97,7 @@ if(!function_exists('getImageUrl')) {
         }
 
         // OTHER FILE TYPE
-        $file->move($fullPath, $filename);
+        $file->move($path, $filename);
 
         return asset("$path/$filename");
     }

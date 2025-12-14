@@ -26,19 +26,14 @@
                 <div class="card-body">
                     <h5 class="card-title mb-3">Product Thumbnail</h5>
                     <div class="product-img text-center p-3 border rounded">
-                        @php
-                            // Check file type based on extension if helper getFileType exists, or manual check
-                            $extension = pathinfo($product->thumbnail, PATHINFO_EXTENSION);
-                            $isVideo = in_array(strtolower($extension), ['mp4', 'webm', 'ogg', 'mov']);
-                        @endphp
 
-                        @if($isVideo)
+                        <img src="{{ $product->image_thumbnail }}" alt="{{ $product->name }}" class="img-fluid d-block mx-auto rounded mb-3" style="max-height: 300px;">
+
+                        @if($product->video_thumbnail)
                             <video class="img-fluid d-block mx-auto rounded" controls style="max-height: 300px;">
-                                <source src="{{ $product->thumbnail }}" type="video/{{ $extension }}">
+                                <source src="{{ $product->video_thumbnail }}" type="video/">
                                 Your browser does not support the video tag.
                             </video>
-                        @else
-                            <img src="{{ $product->thumbnail }}" alt="{{ $product->name }}" class="img-fluid d-block mx-auto rounded" style="max-height: 300px;">
                         @endif
                     </div>
 

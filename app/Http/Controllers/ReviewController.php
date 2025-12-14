@@ -18,7 +18,7 @@ class ReviewController extends Controller
             'products' =>  Product::whereHas('reviews')
                 ->with('reviews', 'reviews.user')
                 ->latest()
-                ->get(['id', 'sku', 'name', 'thumbnail']),
+                ->get(['id', 'sku', 'name', 'image_thumbnail']),
         ]);
     }
 
@@ -32,7 +32,9 @@ class ReviewController extends Controller
 
     public function store(ReviewRequest $request, ReviewService $reviewService)
     {
-//      return $request;
+        // check permission of request user
+        isAuthorized('review create');
+
         $review = $reviewService->updateOrCreate($request->validated());
 
         if(!$review) {

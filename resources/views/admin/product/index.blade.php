@@ -39,12 +39,12 @@
                                     <td>{{ truncateString($product->name, 35) }}</td>
                                     <td>${{ $product->selling_price }}</td>
                                     <td>
-                                        @if(getFileType($product->thumbnail) === 'video')
-                                            <video height="80" width="100" controls class="rounded-2">
-                                                <source src="{{ $product->thumbnail }}" />
-                                            </video>
+                                        @if($product->image_thumbnail)
+                                            <img src="{{ $product->image_thumbnail }}" height="80" width="100" class="rounded-2" alt="thumbnail image" />
                                         @else
-                                            <img src="{{ $product->thumbnail }}" height="80" width="100" class="rounded-2" alt="thumbnail image" />
+                                            <video height="80" width="100" controls class="rounded-2" muted>
+                                                <source src="{{ $product->video_thumbnail }}" />
+                                            </video>
                                         @endif
                                     </td>
                                     <td>

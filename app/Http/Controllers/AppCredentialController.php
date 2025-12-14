@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 use App\Models\AppCredential;
 use App\Models\MailCredential;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AppCredentialController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         return view('admin.app-credential.index', [
             'googleLoginCredential' => AppCredential::where('credential_for', 'google_login')->first(),
@@ -16,7 +18,7 @@ class AppCredentialController extends Controller
         ]);
     }
 
-    public function changeGoogleLoginCredential(Request $request)
+    public function changeGoogleLoginCredential(Request $request): RedirectResponse
     {
         $request->validate([
             'credential_for' => 'required',
@@ -49,7 +51,7 @@ class AppCredentialController extends Controller
         }
     }
 
-    public function changeFacebookLoginCredential(Request $request)
+    public function changeFacebookLoginCredential(Request $request): RedirectResponse
     {
         $request->validate([
             'credential_for' => 'required',
@@ -84,7 +86,8 @@ class AppCredentialController extends Controller
         }
 
     }
-    public function changeMailCredential(Request $request)
+
+    public function changeMailCredential(Request $request): RedirectResponse
     {
         try {
             $mailCredential = MailCredential::first();

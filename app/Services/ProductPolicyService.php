@@ -14,15 +14,16 @@ class ProductPolicyService
             $inputs = collect($data)->except('_token', 'remove_image')->toArray();
 
             if( !empty($data['remove_image']) && $data['remove_image'] == '1') {
+                if($productPolicy?->image) {
+                    removeImage($productPolicy->image);
+                }
                 $inputs['image'] = null;
             }
 
             if(!empty($inputs['image'])) {
                 // remove image if exists
-                if($productPolicy) {
-                    if(file_exists($productPolicy->image)) {
-                        unlink($productPolicy->image);
-                    }
+                if($productPolicy?->image) {
+                    removeImage($productPolicy->image);
                 }
 
                 // get new url after save image

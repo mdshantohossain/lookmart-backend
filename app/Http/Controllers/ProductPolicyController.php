@@ -85,8 +85,8 @@ class ProductPolicyController extends Controller
         // check permission of current user
         isAuthorized('product policy destroy');
 
-        if(file_exists($productPolicy->image)) {
-            unlink($productPolicy->image);
+        if($productPolicy->image) {
+            removeImage($productPolicy->image);
         }
 
         $productPolicy->delete();

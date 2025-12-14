@@ -30,6 +30,7 @@ class ProductCreateRequest extends FormRequest
             'selling_price' => 'required|numeric|min:0|max:999999999.99',
             'buy_price' => 'nullable|string',
             'discount' => ['nullable', 'regex:/^\d{1,3}%$/'],
+            'video_thumbnail' => 'nullable|file|mimetypes:video/*|mimes:mp4,mov,avi,wmv',
             'remove_other_image' => 'nullable|array',
             'remove_other_image.*' => 'in:0,1',
             'remove_variants' => 'nullable|array',
@@ -45,6 +46,7 @@ class ProductCreateRequest extends FormRequest
             'product_policy_id.*' => "nullable|numeric|exists:product_policies,id",
             'is_featured' => 'nullable|in:0,1',
             'is_trending' => 'nullable|in:0,1',
+            'is_free_delivery' => 'nullable|in:0,1',
             'variants' => 'nullable|array',
             'variants.*.sku' => 'nullable|string',
             'variants.*.price' => 'nullable|numeric',
@@ -52,17 +54,17 @@ class ProductCreateRequest extends FormRequest
         ];
 
         if($this->isMethod('put') || $this->isMethod('patch')) {
-            $rules['thumbnail'] = 'nullable|file|mimetypes:image/*,video/*|mimes:jpg,jpeg,png,webp,mp4,mov,avi,wmv';
+            $rules['image_thumbnail'] = 'nullable|file|mimetypes:image/*,video/*|mimes:jpg,jpeg,png,webp';
             $rules['other_images'] = 'nullable|array';
             $rules['sku'] = ['required', 'string', Rule::unique('products', 'sku')->ignore($this->route('product')?->id)];
             $rules['cj_id'] = ['nullable', 'string', Rule::unique('products', 'cj_id')->ignore($this->route('product')?->id)];
 
         } else {
             if($this->filled('cj_id')) {
-                $rules['thumbnail'] = 'required|string';
+                $rules['image_thumbnail'] = 'required|string';
 
             } else {
-                $rules['thumbnail'] = 'required|file|mimetypes:image/*,video/*|mimes:jpg,jpeg,png,webp,mp4,mov,avi,wmv';
+                $rules['image_thumbnail'] = 'required|file|mimetypes:image/*|mimes:jpg,jpeg,png,webp';
             }
 
             $rules['cj_id'] = 'nullable|string|unique:products,cj_id';
