@@ -21,6 +21,13 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, pdo, mysql
 
+      # 3️⃣ Prepare directory
+      - name: Prepare Laravel directories
+        run: |
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/{cache,sessions,views}
+          chmod -R 775 bootstrap/cache storage
+
       # 3️⃣ Install dependencies
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
