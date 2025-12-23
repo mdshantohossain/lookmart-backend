@@ -15,43 +15,43 @@ class ProductPolicySeeder extends Seeder
     {
         $policies = [
             0 => [
-                'policy' => 'Whether customers can return products within a period',
+                'title' => 'Whether customers can return products within a period',
                 'slug' => strtolower(str_replace(' ', '-', 'Whether customers can return products within a period')),
             ],
             1 => [
-                'policy' => 'Explains refund eligibility and process.',
+                'title' => 'Explains refund eligibility and process.',
                 'slug' => strtolower(str_replace(' ', '-', 'Explains refund eligibility and process.')),
             ],
             2 => [
-                'policy' => 'Covers defects or damage for a set period.',
+                'title' => 'Covers defects or damage for a set period.',
                 'slug' => strtolower(str_replace(' ', '-', 'Covers defects or damage for a set period.')),
             ],
             3 => [
-                'policy' => 'Allows exchanging for a different size/color.',
+                'title' => 'Allows exchanging for a different size/color.',
                 'slug' => strtolower(str_replace(' ', '-', 'Allows exchanging for a different size/color.')),
             ],
             4 => [
-                'policy' => 'Explains delivery timelines and charges',
+                'title' => 'Explains delivery timelines and charges',
                 'slug' => strtolower(str_replace(' ', '-', 'Explains delivery timelines and charges')),
             ],
             5 => [
-                'policy' => 'Whether COD is available.',
+                'title' => 'Whether COD is available.',
                 'slug' => strtolower(str_replace(' ', '-', 'Whether COD is available.')),
             ],
             6 => [
-                'policy' => 'Defines if and when an order can be canceled.',
+                'title' => 'Defines if and when an order can be canceled.',
                 'slug' => strtolower(str_replace(' ', '-', 'Defines if and when an order can be canceled.')),
             ],
             7 => [
-                'policy' => 'How customer data is collected and used.',
+                'title' => 'How customer data is collected and used.',
                 'slug' => strtolower(str_replace(' ', '-', 'How customer data is collected and used.')),
             ],
             8 => [
-                'policy' => 'If defective, the product will be replaced.',
+                'title' => 'If defective, the product will be replaced.',
                 'slug' => strtolower(str_replace(' ', '-', 'If defective, the product will be replaced.')),
             ],
             9 => [
-                'policy' => 'Conditions under which free delivery applies.',
+                'title' => 'Conditions under which free delivery applies.',
                 'slug' => strtolower(str_replace(' ', '-', 'Conditions under which free delivery applies.')),
             ]
         ];

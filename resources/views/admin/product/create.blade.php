@@ -385,7 +385,7 @@
                                     data-placeholder="Choose ...">
                                 @foreach($productPolicies as $productPolicy)
                                     <option value="{{ $productPolicy->id }}">
-                                        {{ $productPolicy->policy }}
+                                        {{ $productPolicy->title }}
                                     </option>
                                 @endforeach
                             </select>
@@ -393,7 +393,14 @@
 
                         <!-- Visibility -->
                         <div class="col-md-12 mb-3">
-                            <p class="mb-1 fs-5">Product Visibility & Status</p>
+                            <h4 class="card-title">Product Visibility & Status</h4>
+
+
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="is_free_delivery" name="is_free_delivery" value="1"
+                                    {{ old('is_free_delivery') ? 'checked' : '' }}>
+                                <label for="is_free_delivery" class="form-check-label">Free delivery</label>
+                            </div>
 
                             <div class="form-check mb-2">
                                 <input type="checkbox" class="form-check-input" id="is_featured"

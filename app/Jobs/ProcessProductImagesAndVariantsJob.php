@@ -35,14 +35,13 @@ class ProcessProductImagesAndVariantsJob implements ShouldQueue
             // Insert variants
             if (!empty($this->variants)) {
                 foreach ($this->variants as $variant) {
-
-                 $variant =  ProductVariant::updateOrCreate(
+                    ProductVariant::updateOrCreate(
                         [
                             'id' => $variant['id'] ?? 0
                         ],
                         [
                             'vid' => $variant['vid'],
-                            'product_id' => $variant['product_id'],
+                            'product_id' => $this->productId,
                             'sku' => $variant['sku'],
                             'variant_key' => $variant['variant_key'],
                             'buy_price' => $variant['buy_price'],
@@ -51,8 +50,6 @@ class ProcessProductImagesAndVariantsJob implements ShouldQueue
                             'image' => $variant['image'],
                         ]
                     );
-
-                 logger($variant);
                 }
             }
         });

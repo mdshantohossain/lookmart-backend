@@ -17,15 +17,14 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    protected string $redisKey = 'products', $redisField = 'all';
+    protected string $redisKey = 'products', $exclusiveRedisKey = 'exclusive-products', $trendingRedisKey = 'trending-products', $redisField = 'all';
 
     // get exclusive section product on frontend
     public function getExclusiveProducts(): JsonResponse
     {
-        $redisKey ='exclusive-products';
         $redisField ='all';
 
-        $cached = Redis::hget($redisKey, $redisField);
+        $cached = Redis::hget($this->exclusiveRedisKey, $redisField);
 
         if($cached){
             $products = json_decode($cached);
@@ -42,7 +41,7 @@ class ProductController extends Controller
                 ->get();
 
             // caching
-            Redis::hset($redisKey, $redisField, json_encode($products));
+            Redis::hset($this->exclusiveRedisKey, $redisField, json_encode($products));
         }
 
         return response()->json($products);
@@ -51,10 +50,8 @@ class ProductController extends Controller
     // get tending section product on frontend
     public function getTrendingProducts(): JsonResponse
     {
-        $redisKey ='trending-products';
         $redisField ='all';
-
-        $cached = Redis::hget($redisKey, $redisField);
+        $cached = Redis::hget($this->trendingRedisKey, $redisField);
 
         if($cached) {
             $products = json_decode($cached);
@@ -72,7 +69,7 @@ class ProductController extends Controller
                 ->get();
 
             // caching
-            Redis::hset($redisKey, $redisField, json_encode($products));
+            Redis::hset($this->trendingRedisKey, $redisField, json_encode($products));
         }
 
         return response()->json($products);
@@ -150,7 +147,6 @@ class ProductController extends Controller
 
     public function update(ProductCreateRequest $request, Product $product, ProductService $productService): RedirectResponse
     {
-//        return $request;
         // check permission of current user
         isAuthorized('product edit');
 
@@ -208,7 +204,9 @@ class ProductController extends Controller
 
     public function updateRedisCacheForProduct(): void
     {
-        $products = Product::with('category')->latest()->get(['name', 'slug', 'image_thumbnail', 'video_thumbnail', 'selling_price', 'category_id', 'status']);
+        $products = Product::with('category')
+                        ->latest()
+                        ->get(['name', 'slug', 'image_thumbnail', 'video_thumbnail', 'selling_price', 'category_id', 'status']);
         // redis caching
         Redis::hset($this->redisKey, $this->redisField, json_encode($products));
     }
@@ -217,12 +215,22 @@ class ProductController extends Controller
     {
         Redis::hdel($this->redisKey, $this->redisField);
 
+        Redis::hdel($this->exclusiveRedisKey, $this->redisField);
+
+        Redis::hdel($this->trendingRedisKey, $this->redisField);
+
         Redis::del("product_detail:$product->slug");
 
         Redis::del("category_products:{$product->category_id}");
 
         if ($product->sub_category_id) {
             Redis::del("subcategory_products:{$product->sub_category_id}");
+        }
+
+        $cacheKey = "product_detail:$product->slug";
+
+        if(Redis::exists($cacheKey)) {
+            Redis::del($cacheKey);
         }
     }
     public function getProductDetail(string $slug): JsonResponse
@@ -231,8 +239,7 @@ class ProductController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Slug is missing',
-            ], 419);
-        }
+            ], 419);        }
 
         $cacheKey = "product_detail:$slug";
 
@@ -254,6 +261,8 @@ class ProductController extends Controller
                 'message' => 'Slug is missing',
             ]);
         }
+
+        $product->policies = $product->policies()->get();
 
         // Fetch related products by category
         $relatedProducts = Product::with( 'variants')
@@ -319,7 +328,7 @@ class ProductController extends Controller
                 ->where('category_id', $category->id)
                 ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
                     'video_thumbnail', 'selling_price', 'original_price', 'discount',
-                    'total_day_to_delivery', 'total_sold', 'is_free_delivery'])
+                    'total_day_to_delivery', 'total_sold', 'is_free_delivery', 'created_at'])
                 ->withCount('reviews')
                 ->withAvg('reviews', 'rating')
                 ->where('status', 1)
@@ -377,7 +386,7 @@ class ProductController extends Controller
                 ->where('sub_category_id', $subCategory->id)
                 ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
                     'video_thumbnail', 'selling_price', 'original_price', 'discount',
-                    'total_day_to_delivery', 'total_sold', 'is_free_delivery'])
+                    'total_day_to_delivery', 'total_sold', 'is_free_delivery', 'created_at'])
                 ->withCount('reviews')
                 ->withAvg('reviews', 'rating')
                 ->where('status', 1)
@@ -415,7 +424,7 @@ class ProductController extends Controller
             ->orWhere('sku', 'LIKE', "%{$search}%")
             ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
                 'video_thumbnail', 'selling_price', 'original_price', 'discount',
-                'total_day_to_delivery', 'total_sold', 'is_free_delivery'])
+                'total_day_to_delivery', 'total_sold', 'is_free_delivery', 'created_at'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('status', 1)

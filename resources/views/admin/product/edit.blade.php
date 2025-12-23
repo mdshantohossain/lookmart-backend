@@ -361,10 +361,10 @@
                             <label class="control-label">Product Policy</label>
                             <select class="select2 form-control select2-multiple"
                                     name="product_policy_id[]" multiple="multiple"
-                                    data-placeholder="Choose ...">
+                                    data-placeholder="Choose policy for product ...">
                                 @foreach($productPolicies as $productPolicy)
-                                    <option value="{{ $productPolicy->id }}" {{ in_array($productPolicy->id, json_decode($product->product_policy_id, true) ?? []) ? 'selected' : '' }}>
-                                        {{ $productPolicy->policy }}
+                                    <option value="{{ $productPolicy->id }}" {{ in_array($productPolicy->id, json_decode($product->product_policy_id) ?? []) ? 'selected' : '' }}>
+                                        {{ $productPolicy->title }}
                                     </option>
                                 @endforeach
                             </select>
@@ -372,6 +372,13 @@
 
                         <!-- Visibility -->
                         <div class="col-md-12 mb-3">
+                            <h4 class="card-title">Product Visibility & Status</h4>
+
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="is_free_delivery" name="is_free_delivery" value="1"
+                                    {{ old('is_free_delivery', $product->is_featured) ? 'checked' : '' }}>
+                                <label for="is_free_delivery" class="form-check-label">Free delivery</label>
+                            </div>
                             <div class="form-check mb-2">
                                 <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured" value="1"
                                     {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}>

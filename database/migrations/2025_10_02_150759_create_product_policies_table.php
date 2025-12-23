@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('product_policies', function (Blueprint $table) {
             $table->id();
-            $table->string('policy');
+            $table->string('title');
             $table->text('image')->nullable();
             $table->string('slug')->unique();
             $table->timestamps();

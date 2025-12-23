@@ -38,7 +38,7 @@
                                         {{ $loop->iteration }}
                                     </td>
                                     <td>
-                                        <img src="{{ $product->thumbnail }}" width="60" height="60" class="rounded-2" alt="{{ $product->name }}" />
+                                        <img src="{{ $product->image_thumbnail }}" width="60" height="60" class="rounded-2" alt="{{ $product->name }}" />
                                     </td>
                                     <td>
                                         {{ truncateString($product->name, 75) }}

@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -26,7 +25,6 @@ use App\Http\Controllers\ReviewController;
 // middleware
 use App\Http\Middleware\AdminAuthenticatedMiddleware;
 use App\Http\Middleware\AuthenticatedForUserMiddleware;
-
 
 // custom login route
 Route::post('/login', [LoginController::class, 'index'])->name('login');

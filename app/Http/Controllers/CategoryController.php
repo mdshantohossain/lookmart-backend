@@ -29,7 +29,13 @@ class CategoryController extends Controller
             $categories = json_decode($cached);
         } else {
             $categories = Category::with(['subCategories', 'products' => function ($query) {
-                $query->latest()->take(6);
+                $query->select(['id', 'category_id', 'name', 'slug', 'image_thumbnail', 'sku',
+                    'video_thumbnail', 'selling_price', 'original_price', 'discount',
+                    'total_day_to_delivery', 'total_sold', 'is_free_delivery'])
+                    ->withCount('reviews')
+                    ->withAvg('reviews', 'rating')
+                    ->latest()
+                    ->take(6);
             }])->where('status', 1)->get();
 
             // caching
@@ -142,9 +148,15 @@ class CategoryController extends Controller
         return view('website.product-page.index', [
             'title' => "$subCategory->name Products",
             'products' => Product::where('sub_category_id', $subCategory->id)
-                ->where('status', 1)
-                ->paginate(12),
-            'categories' =>Category::with('products')
+                                ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
+                                    'video_thumbnail', 'selling_price', 'original_price', 'discount',
+                                    'total_day_to_delivery', 'total_sold', 'is_free_delivery'])
+                                ->where('status', 1)
+                                ->withCount('reviews')
+                                ->withAvg('reviews', 'rating')
+                                ->latest()
+                                ->paginate(12),
+            'categories' => Category::with('products')
                 ->where('status', 1)
                 ->take(5)
                 ->get()
@@ -156,8 +168,14 @@ class CategoryController extends Controller
         return view('website.product-page.index', [
             'title' => "$category->name Products",
             'products' => Product::where('category_id', $category->id)
-                ->where('status', 1)
-                ->paginate(12),
+                                ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
+                                    'video_thumbnail', 'selling_price', 'original_price', 'discount',
+                                    'total_day_to_delivery', 'total_sold', 'is_free_delivery'])
+                                ->where('status', 1)
+                                ->withCount('reviews')
+                                ->withAvg('reviews', 'rating')
+                                ->latest()
+                                ->paginate(12),
             'categories' => Category::with('products')
                 ->where('status', 1)
                 ->take(5)

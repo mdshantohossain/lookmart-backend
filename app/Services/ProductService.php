@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Http\Requests\ProductCreateRequest;
 use App\Jobs\ProcessProductImagesAndVariantsJob;
 use App\Models\Admin\Product;
 use App\Models\OtherImage;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class ProductService
 {
@@ -16,7 +16,7 @@ class ProductService
      * @param array $data
      * @param Product|null $product
      * @return Product|null
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function updateOrCreate(array $data, ?Product $product = null): ?Product
     {
@@ -80,6 +80,7 @@ class ProductService
                 'product_policy_id' => !empty($data['product_policy_id']) ? json_encode($data['product_policy_id']) : null,
                 'is_featured' => $data['is_featured'] ?? 0,
                 'is_trending' => $data['is_trending'] ?? 0,
+                'is_free_delivery' => $data['is_free_delivery'] ?? 0,
                 'product_owner' => $data['product_owner'],
                 'status' => $data['status'],
                 'slug' => $product ? $product->slug : generateUniqueSlug($data['name'])
@@ -172,7 +173,7 @@ class ProductService
             DB::commit();
 
             return $storedProduct;
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             DB::rollBack();
             report($exception);
             throw $exception;

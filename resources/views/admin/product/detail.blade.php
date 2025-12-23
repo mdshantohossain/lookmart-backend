@@ -83,6 +83,12 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th scope="row">Free delivery</th>
+                                <td>
+                                    <i class="fa {{ $product->is_free_delivery ? 'fa-check-circle text-success' : 'fa-times-circle text-secondary' }}"></i>
+                                </td>
+                            </tr>
+                            <tr>
                                 <th scope="row">Featured</th>
                                 <td>
                                     <i class="fa {{ $product->is_featured ? 'fa-check-circle text-success' : 'fa-times-circle text-secondary' }}"></i>
