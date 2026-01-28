@@ -1,0 +1,32 @@
+[33m4768b3f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;32mshanto[m[33m)[m fix caching strategy
+[33me876f84[m fix token issue
+[33m245f886[m fix login bugs and token issue, added user address
+[33m90d7b89[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m imediate push
+[33mbb0dee5[m test success
+[33me62f142[m ci/cd test
+[33m285819a[m fix deploy.yml conflict
+[33maefd7fd[m ci/cd created
+[33mce002be[m Update deploy.yml
+[33ma67eb55[m Add FTP port and source to deploy workflow
+[33mbc3fc71[m Update server directory for deployment
+[33m469f244[m Refactor deploy.yml for PHP setup and FTP deployment
+[33m267432c[m Update PHP version from 8.2 to 8.4
+[33me97ffde[m created a step for prepare dir
+[33mc0f6953[m bootstrap cache folder added
+[33md6ec634[m Add GitHub Actions workflow for Laravel CI/CD
+[33m1ae4f65[m Merge pull request #5 from mdshantohossain/shanto
+[33m6dc6ceb[m fix product variant creation
+[33m4146144[m implement image resize and fix image remove
+[33md0afba0[m redis added and configured used to funcional for better performance
+[33ma36af91[m fix product module
+[33m9bdd549[m Merge pull request #4 from mdshantohossain/shanto
+[33mab71ad9[m fix user access token refresh login
+[33m02acf28[m socialite login implemented and added cupon and branch feature
+[33m838d877[m Merge pull request #3 from mdshantohossain/shanto
+[33m2ad069c[m changes assets local to cdn
+[33mbdad193[m product added bug fixed
+[33mbaabcd3[m Merge pull request #2 from mdshantohossain/shanto
+[33m9494111[m fix product create issue for manual and cj import
+[33m95ea070[m Merge pull request #1 from mdshantohossain/shanto
+[33m0d7c733[m implementented role and permissions based access. fix all mail template
+[33m78abbec[m inital commit

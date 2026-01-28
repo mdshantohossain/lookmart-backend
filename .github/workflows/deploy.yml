@@ -1,0 +1,78 @@
+name: Look Mart Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup PHP
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo, mysql
+          tools: composer:v2
+
+      # 3️⃣ Cache Composer dependencies to speed up builds
+      - name: Cache Composer
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      # 4️⃣ Prepare Laravel directories
+      - name: Prepare Laravel directories
+        run: |
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/{cache,sessions,views}
+          touch bootstrap/cache/packages.php
+          touch bootstrap/cache/services.php
+          chmod -R 775 bootstrap/cache storage
+
+      # 5️⃣ Install Composer dependencies
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      # 6️⃣ Optional: Run tests
+      - name: Run Tests
+        run: php artisan test
+        continue-on-error: true
+
+      # 7️⃣ Deploy via SFTP to subdomain folder
+      - name: Deploy via SFTP
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: "."
+          target: "/home/lookmart/admin.lookmartbd.com"
+          rm: false # keep existing files not overwritten by source
+
+      # 8️⃣ Run post-deploy Artisan commands
+      - name: Post-deploy commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/lookmart/admin.lookmartbd.com
+            php artisan migrate --force
+            php artisan down
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan optimize
+            php artisan up
