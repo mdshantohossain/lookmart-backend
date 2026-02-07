@@ -13,6 +13,11 @@ class ProductObserver
     public function created(Product $product): void
     {
         RevalidateProductPageJob::dispatch($product->slug);
+        logger([
+            'id' => $product->id,
+            'slug' => $product->slug,
+            'category_id' => $product->category_id
+        ]);
         ProductCacheJob::dispatch($product->id, $product->slug, $product->category_id);
     }
 
@@ -21,7 +26,7 @@ class ProductObserver
      */
     public function updated(Product $product): void
     {
-        if($product->wasChanged(['name', 'regular_price', 'selling_price', 'discount', 'short_description', 'description', 'image_thumbnail', 'video_thumbnail'])) {
+        if($product->wasChanged(['name', 'category_id', 'regular_price', 'selling_price', 'discount', 'short_description', 'description', 'image_thumbnail', 'video_thumbnail'])) {
             RevalidateProductPageJob::dispatch($product->slug);
             ProductCacheJob::dispatch($product->id, $product->slug, $product->category_id);
         }

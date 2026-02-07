@@ -36,7 +36,7 @@
                                         {{ $loop->iteration }}
                                     </td>
                                     <td>
-                                        {{ substr($productPolicy->policy, 0, 70) }}
+                                        {{ substr($productPolicy->title, 0, 70) }}
                                     </td>
                                     <td>
                                         @if($productPolicy->image)

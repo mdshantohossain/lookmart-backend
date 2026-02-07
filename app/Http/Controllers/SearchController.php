@@ -6,6 +6,7 @@ use App\Models\Admin\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Admin\Category;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
@@ -51,6 +52,60 @@ class SearchController extends Controller
         } catch (\Throwable $e) {
             report($e);
             throw $e;
+        }
+    }
+
+    public function filterProducts(Request $request): JsonResponse
+    {
+        try {
+            $filters = [
+                'categories' => $request->categories,
+                'brands' => $request->brands,
+                'sizes' => $request->sizes,
+                'min_price' => $request->min_price,
+                'max_price' => $request->max_price,
+                'page' => $request->page ?? 1,
+            ];
+
+            $cacheKey = 'products:' . md5(json_encode($filters));
+
+            return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($filters) {
+                $query = Product::query();
+
+                if($filters['categories']) {
+                    $query->whereIn('category_id', explode(',', $filters['categories']));
+                }
+
+                if($filters['brands']) {
+                    $query->whereIn('brand_id', explode(',', $filters['brands']));
+                }
+
+                if($filters['sizes']) {
+                    $query->whereHas('variants', function ($q) use ($filters) {
+                        $q->whereIn('variant_key', $filters['sizes']);
+                    });
+                }
+
+                if ($filters['min_price']) {
+                    $query->where('selling_price', '>=', $filters['min_price']);
+                }
+
+                if ($filters['max_price']) {
+                    $query->where('selling_price', '<=', $filters['max_price']);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $query->paginate(2),
+                ]);
+            });
+
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }

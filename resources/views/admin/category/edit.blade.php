@@ -32,27 +32,27 @@
                             <label for="formrow-firstname-input" class="form-label">Image</label>
                             <input type="file" class="form-control image" value="{{ $category->image }}" name="image" />
                             @error('image')
-                            <div class="text-danger">{{ $message }}</div>
+                            <div class="text-danger" id="imageError">{{ $message }}</div>
                             @enderror
-                            <div class="mt-2 category-image-preview">
-                                @if($category->image)
+                                <div class="mt-2 category-image-preview">
+                                    @if(old('remove_image') != "1")
                                     <div class="position-relative d-inline-block">
-                                        <img src="{{ $category->image }}"
-                                             class="img-thumbnail rounded-2"
-                                             height="120"
-                                             width="120"
-                                             loading="lazy"
-                                             alt="{{$category->name}}"
-                                        />
-                                        <i
-                                            data-img-url="{{ $category->image }}"
-                                            class="position-absolute top-0 end-0 remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger cursor-pointer"
-                                            aria-hidden="true"
-                                            style="cursor: pointer"
-                                        ></i>
-                                    </div>
-                                @endif
-                            </div>
+                                            <img src="{{ $category->image }}"
+                                                 class="img-thumbnail rounded-2"
+                                                 height="120"
+                                                 width="120"
+                                                 loading="lazy"
+                                                 alt="{{$category->name}}"
+                                            />
+                                            <i
+                                                data-img-url="{{ $category->image }}"
+                                                class="position-absolute top-0 end-0 remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger cursor-pointer"
+                                                aria-hidden="true"
+                                                style="cursor: pointer"
+                                            ></i>
+                                        </div>
+                                    @endif
+                                </div>
                         </div>
 
                         <div class="row">
@@ -92,6 +92,12 @@
             const imageContainer = $('.category-image-preview');
             imageContainer.empty();
 
+            // remove error message when upload new image
+            $('#imageError').text('');
+
+            // set remove_image value 1 for remove image from db and storage
+            $('.remove-image').val('1');
+
             const render = new FileReader();
             render.onload = (e) => {
                 const image = `<div class="position-relative d-inline-block">
@@ -102,10 +108,10 @@
                          loading="lazy"
                          alt="${e.target.result}"
                     />
-<i data-img-url="${e.target.result}" class="position-absolute top-0 end-0 remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger cursor-pointer"
-aria-hidden="true"
-style="cursor: pointer"
-></i>
+                        <i data-img-url="${e.target.result}" class="position-absolute top-0 end-0 remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger cursor-pointer"
+                        aria-hidden="true"
+                        style="cursor: pointer"
+                        ></i>
                 </div>`;
 
                 imageContainer.html(image);

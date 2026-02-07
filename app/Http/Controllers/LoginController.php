@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\SignInOrSignUpRequest;
 use App\Models\RefreshAccessToken;
 use App\Models\User;
 use App\Services\AuthService;
@@ -78,5 +79,17 @@ class LoginController extends Controller
     public function logout(AuthService $authService): JsonResponse
     {
         return $authService->logout();
+    }
+
+    public function signinOrSignup(SignInOrSignUpRequest $request, AuthService $authService): JsonResponse
+    {
+        $user = User::firstWhere('email', $request->email);
+
+        if (! $user) {
+            return $authService->register($request->validated());
+        }
+
+        return $authService->login($user);
+
     }
 }

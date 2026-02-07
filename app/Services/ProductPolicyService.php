@@ -11,7 +11,7 @@ class ProductPolicyService
     {
         DB::beginTransaction();
         try {
-            $inputs = collect($data)->except('_token', 'remove_image')->toArray();
+            $inputs = collect($data)->except(['_token', 'remove_image'])->toArray();
 
             if( !empty($data['remove_image']) && $data['remove_image'] == '1') {
                 if($productPolicy?->image) {
@@ -23,20 +23,27 @@ class ProductPolicyService
             if(!empty($inputs['image'])) {
                 // remove image if exists
                 if($productPolicy?->image) {
-                    removeImage($productPolicy->image);
+                   if($productPolicy->image) removeImage($productPolicy->image);
                 }
 
                 // get new url after save image
                 $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/uploaded-images/product-policy-images/');
             }
 
-            $inputs['slug'] = generateUniqueSlug($inputs['policy']);
+            $inputs['slug'] = generateUniqueSlug($inputs['title']);
+
+            if($productPolicy) {
+                $productPolicy = tap($productPolicy)->update($inputs);
+            } else {
+                $productPolicy = ProductPolicy::create($inputs);
+            }
 
             DB::commit();
-            return $productPolicy ? tap($productPolicy)->update($inputs) : ProductPolicy::create($inputs);
+
+            return $productPolicy;
         } catch (\Exception $exception) {
             DB::rollBack();
-            logger()->error($exception->getMessage());
+            report($exception->getMessage());
             return null;
         }
     }

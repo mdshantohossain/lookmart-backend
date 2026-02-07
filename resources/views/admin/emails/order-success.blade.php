@@ -154,13 +154,13 @@
         </table>
 
         <div class="order-summary">
-            <p><strong>Total:</strong> ৳{{ number_format($order->order_total, 2) }}</p>
+            <p><strong>Total:</strong> ${{ number_format($order->order_total, 2) }}</p>
         </div>
 
         <p style="margin-top:25px;">You can track your order anytime from your account dashboard.</p>
 
         <div class="btn-container">
-            <a href="{{ env('FRONTEND_URL') . '/dashboard' }}" class="btn">View My Order</a>
+            <a href="{{ config('services.frontend.url') . '/dashboard' }}" class="btn">View My Order</a>
         </div>
     </div>
 

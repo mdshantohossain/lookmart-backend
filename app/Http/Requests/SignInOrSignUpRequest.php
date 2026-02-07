@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class ProductPolicyRequest extends FormRequest
+class SignInOrSignUpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,16 +21,17 @@ class ProductPolicyRequest extends FormRequest
      */
     public function rules(): array
     {
-        ;
         return [
-            'title' => [
-                'required',
-                'string',
-                'min:3',
-                'max:255',
-                Rule::unique('product_policies', 'title')->ignore($this->route('product_policy')?->id),
-            ],
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'name' => 'required',
+            'email' => 'required|email',
+            'phone' => 'required',
+            'password' => 'required|min:8|max:16',
+            'country' => 'required',
+            'state' => 'required',
+            'city' => 'required',
+            'street_address' => 'required',
+            'zipcode' => 'required',
+
         ];
     }
 }

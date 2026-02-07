@@ -573,14 +573,14 @@
             // helper: Image Preview
             const createImagePreview = (src, width = 100, height = 100, hiddenInputName = null) => {
                 let html = `
-        <div class="position-relative d-inline-block" style="width:${width}px;height:${height}px;margin:5px;">
-            <img src="${src}" class="img-thumbnail rounded-2"
-                 style="width:${width}px;height:${height}px;object-fit:cover;border-radius:8px;"
-                 loading="lazy" alt="product" referrerpolicy="no-referrer" />
-            <i data-img-url="${src}"
-               class="position-absolute remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger"
-               style="cursor:pointer; top:5px; right:-2px"></i>
-        </div>`;
+                    <div class="position-relative d-inline-block" style="width:${width}px;height:${height}px;margin:5px;">
+                        <img src="${src}" class="img-thumbnail rounded-2"
+                             style="width:${width + 'px'};height:${height + 'px'};object-fit:cover;border-radius:8px;"
+                             loading="lazy" alt="product" referrerpolicy="no-referrer" />
+                        <i data-img-url="${src}"
+                           class="position-absolute remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger"
+                           style="cursor:pointer; top:5px; right:-2px"></i>
+                    </div>`;
                 if (hiddenInputName) {
                     const id = hiddenInputName.replace(/\[\]/g, '');
                     html += `<input type="hidden" id="${id}" name="${hiddenInputName}" value="${src}">`;
@@ -910,5 +910,4 @@
             $('#long_description').summernote({ height: 200, placeholder: 'Enter product long description...' });
         });
     </script>
-
 @endpush

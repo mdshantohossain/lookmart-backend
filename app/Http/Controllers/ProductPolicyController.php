@@ -11,8 +11,7 @@ use Illuminate\View\View;
 
 class ProductPolicyController extends Controller
 {
-    protected string $redisKey = 'productPolicies';
-    protected string $redisField = 'all';
+    protected string $redisKey = 'productPolicies', $redisField = 'all';
 
     public function index(): View
     {

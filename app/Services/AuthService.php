@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\EmailVerification;
 use App\Models\RefreshAccessToken;
 use App\Models\User;
+use App\Models\UserAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,14 @@ class AuthService
     }
 
     /**
-     * @param array{email: string, password: string} $data
+     * @param array{
+     *      email: string,
+     *      password: string,
+     *      phone: string,
+     *      street_address?: string,
+     *      city?: string,
+     *      state?: string,
+     *      zipcode?: string} $data
      * @return JsonResponse
      */
     public function login(array $data): JsonResponse
@@ -51,6 +59,12 @@ class AuthService
                 'expires_in' => now()->addDays(7),
             ]);
 
+            // create address this will fire when user sign in or signup to checkout
+
+            if(isset($data['street_address'])) {
+                $this->createAddress($data, $user->id);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Login successfully.',
@@ -78,8 +92,21 @@ class AuthService
     }
 
     /**
-     * @param array{name: string, email: string, password: string} $data
-     * @return JsonResponse
+     * Register a new user and save address also if included.
+     *
+     * @param array{
+     *     name: string,
+     *     email: string,
+     *     password: string,
+     *     phone?: string|null,
+     *     country?: string|null,
+     *     street_address?: string,
+     *     city?: string,
+     *     state?: string,
+     *     zipcode?: string
+     * } $data
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function register(array $data): JsonResponse
     {
@@ -87,6 +114,8 @@ class AuthService
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'country' => $data['country'] ?? null,
                 'password' => bcrypt($data['password']),
                 'role' => 'user'
             ]);
@@ -98,21 +127,50 @@ class AuthService
                 ], 500);
             }
 
+            if(isset($data['street_address'])) {
+                $this->createAddress($data, $user->id);
+            }
+
             $this->createOrSendTokenToEmail($user);
 
             return response()->json([
-                'status' => 'success',
+                'success' => true,
                 'message' => 'Registration successful.'
             ], 201);
         } catch (\Throwable $e) {
             report($e->getMessage());
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => app()->environment('local')
                     ? $e->getMessage()
                     : 'An unexpected error occurred. Please try again later.',
             ], 500);
         }
+    }
+
+    /**
+     * Create address .
+     *
+     * @param array{
+     *     phone: string,
+     *     street_address?: string,
+     *     city?: string,
+     *     state?: string,
+     *     zipcode?: string
+     * } $data
+     * @param int $userId
+     * @return void
+     */
+    public function createAddress(array $data, int $userId): void
+    {
+        UserAddress::create([
+            'user_id' => $userId,
+            'phone' => $data['phone'],
+            'street_address' => $data['street_address'],
+            'city' => $data['city'],
+            'state' => $data['state'],
+            'zipcode' => $data['zipcode'],
+        ]);
     }
 
     /**

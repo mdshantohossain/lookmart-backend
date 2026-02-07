@@ -18,9 +18,9 @@
                         @method('PUT')
                         <input type="hidden" name="remove_image" class="remove-image" value="0" />
                         <div class="mb-3">
-                            <label for="formrow-firstname-input" class="form-label">Policy<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" value="{{ $productPolicy->policy }}" name="policy" placeholder="Enter product policy" />
-                            @error('policy')
+                            <label for="formrow-firstname-input" class="form-label">Title<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" value="{{ $productPolicy->title }}" name="title" placeholder="Enter product title" />
+                            @error('title')
                             <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>

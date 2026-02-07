@@ -52,7 +52,7 @@
     <!-- Footer -->
     <div style="background-color:#2b2b2b; padding:20px; text-align:center; color:#ccc; font-size:13px;">
         <p style="margin:0;">
-            Need help? <a href="{{ config('app.frontend_url') . '/contact' }}" style="color:#ff7373; text-decoration:none;">Contact our support team</a>.
+            Need help? <a href="{{ config('services.frontend.url') . '/contact' }}" style="color:#ff7373; text-decoration:none;">Contact our support team</a>.
         </p>
         <p style="margin-top:8px;">© {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
     </div>

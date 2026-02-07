@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CategoryRequest;
 use App\Models\Admin\Category;
-use App\Models\Admin\Product;
-use App\Models\Admin\SubCategory;
 use App\Services\CategoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redis;
@@ -115,6 +113,7 @@ class CategoryController extends Controller
             return redirect()->back()->with('error', $exception);
         }
     }
+
     public function destroy(Category $category): RedirectResponse
     {
         // check permission of current user

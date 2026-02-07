@@ -33,7 +33,7 @@ class ProductCacheJob implements ShouldQueue
 
     protected function rebuildProductCache(): void
     {
-        $cacheKey = "product_detail:{$this->slug}";
+        $cacheKey = "product_detail:$this->slug";
 
         Redis::del($cacheKey);
 
@@ -52,21 +52,21 @@ class ProductCacheJob implements ShouldQueue
             return;
         }
 
-        Redis::set($cacheKey, [
+        Redis::set($cacheKey, json_encode([
             'success' => true,
             'data' => $product,
-        ]);
+        ]));
     }
 
     // product's related product
     protected function rebuildRelatedProductsCache(): void
     {
-        $cacheKey = "related_products:{$this->slug}";
+        $cacheKey = "related_products:$this->slug";
 
         Redis::del($cacheKey);
 
         // Fetch related products by product category
-        $relatedProducts = Product::with( 'variants')
+        $relatedProducts = Product::with('variants')
             ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
                 'video_thumbnail', 'selling_price', 'original_price', 'discount',
                 'total_day_to_delivery', 'total_sold', 'is_free_delivery']) // add more field if needed

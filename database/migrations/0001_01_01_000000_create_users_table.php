@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('profile_photo_path', 2048)->nullable();
             $table->tinyInteger('status')->default(1)->comment('0=inactive, 1=active, 2=blocked');
             $table->tinyInteger('is_active')->default(0)->comment('0=offline, 1=online');
-            $table->text('identity')->nullable();
+            $table->string('country')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

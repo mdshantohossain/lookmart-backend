@@ -17,14 +17,16 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    protected string $redisKey = 'products', $exclusiveRedisKey = 'exclusive-products', $trendingRedisKey = 'trending-products', $redisField = 'all';
+    protected string $redisKey = 'products',
+        $exclusiveRedisKey = 'exclusive-products',
+        $trendingRedisKey = 'trending-products',
+        $redisField = 'all',
+        $redisSlugKey = "slugs";
 
     // get exclusive section product on frontend
     public function getExclusiveProducts(): JsonResponse
     {
-        $redisField ='all';
-
-        $cached = Redis::hget($this->exclusiveRedisKey, $redisField);
+        $cached = Redis::get($this->exclusiveRedisKey);
 
         if($cached){
             $products = json_decode($cached);
@@ -41,7 +43,7 @@ class ProductController extends Controller
                 ->get();
 
             // caching
-            Redis::hset($this->exclusiveRedisKey, $redisField, json_encode($products));
+            Redis::set($this->exclusiveRedisKey, json_encode($products));
         }
 
         return response()->json($products);
@@ -50,8 +52,7 @@ class ProductController extends Controller
     // get tending section product on frontend
     public function getTrendingProducts(): JsonResponse
     {
-        $redisField ='all';
-        $cached = Redis::hget($this->trendingRedisKey, $redisField);
+        $cached = Redis::get($this->trendingRedisKey, $this->redisField);
 
         if($cached) {
             $products = json_decode($cached);
@@ -65,27 +66,27 @@ class ProductController extends Controller
                 ->withAvg('reviews', 'rating')
                 ->where('status', 1)
                 ->where('is_trending', 1)
-                ->take(20)
+                ->take(30)
                 ->get();
 
-            // caching
-            Redis::hset($this->trendingRedisKey, $redisField, json_encode($products));
+
         }
 
         return response()->json($products);
     }
 
-    public function index(): View
+    public function index()
     {
-        $cached = Redis::hget($this->redisKey, $this->redisField);
+        $cached = Redis::get($this->redisKey);
 
         if($cached) {
             $products = json_decode($cached);
         } else {
-            $products = Product::with('category')->latest()->get(['name', 'slug', 'image_thumbnail', 'video_thumbnail', 'selling_price', 'category_id', 'status']);
+            $products = Product::with('category')->latest()->get(['name', 'slug', 'image_thumbnail', 'video_thumbnail',
+                'selling_price', 'category_id', 'status']);
 
             // caching
-            Redis::hset($this->redisKey, $this->redisField, json_encode($products));
+            Redis::set($this->redisKey, json_encode($products));
         }
 
         return view('admin.product.index', compact('products'));
@@ -103,12 +104,15 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function store(ProductCreateRequest $request, ProductService $productService)
     {
         // check permission of request user.
         isAuthorized('product create');
 
-        $product = $productService->updateOrCreate($request->all());
+        $product = $productService->updateOrCreate($request->validated());
 
         if (!$product) {
             return back()->with('error', 'Product could not be created');
@@ -132,7 +136,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function edit(Product $product):  View
+    public function edit(Product $product): View
     {
         // check permission of request user
         isAuthorized('product edit');
@@ -204,27 +208,35 @@ class ProductController extends Controller
 
     public function updateRedisCacheForProduct(): void
     {
-        $products = Product::with('category')
-                        ->latest()
-                        ->get(['name', 'slug', 'image_thumbnail', 'video_thumbnail', 'selling_price', 'category_id', 'status']);
+        $products = Product::with(['category'])
+            ->select(['id', 'name', 'category_id', 'slug', 'image_thumbnail', 'sku',
+                'video_thumbnail', 'selling_price', 'original_price', 'discount',
+                'total_day_to_delivery', 'total_sold', 'is_free_delivery', 'status']) // add more field if needed
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->where('status', 1)
+            ->get();
+
         // redis caching
-        Redis::hset($this->redisKey, $this->redisField, json_encode($products));
+        Redis::set($this->redisKey, json_encode($products));
     }
 
     public function clearProductCache(Product $product)
     {
-        Redis::hdel($this->redisKey, $this->redisField);
+        $product->load(['category', 'subCategory']);
 
-        Redis::hdel($this->exclusiveRedisKey, $this->redisField);
+        Redis::del($this->redisSlugKey);
 
-        Redis::hdel($this->trendingRedisKey, $this->redisField);
+        Redis::del($this->redisKey);
 
-        Redis::del("product_detail:$product->slug");
+        Redis::del($this->exclusiveRedisKey);
 
-        Redis::del("category_products:{$product->category_id}");
+        Redis::del($this->trendingRedisKey);
+
+        Redis::del("category_products:$product->category->slug");
 
         if ($product->sub_category_id) {
-            Redis::del("subcategory_products:{$product->sub_category_id}");
+            Redis::del("subcategory_products:$product->subCategory->slug");
         }
 
         $cacheKey = "product_detail:$product->slug";
@@ -433,7 +445,15 @@ class ProductController extends Controller
 
     public function getProductsSlugs(): JsonResponse
     {
+        $cached = Redis::get($this->redisSlugKey);
+
+        if($cached) {
+             return response()->json(json_decode($cached));
+        }
+
         $products = Product::where('status', 1)->get('slug');
+        Redis::set($this->redisSlugKey, json_encode($products));
+
         return response()->json($products);
     }
 

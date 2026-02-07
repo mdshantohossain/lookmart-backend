@@ -32,10 +32,12 @@
                             </thead>
                             <tbody>
 
+{{--                            @dd($products)--}}
+
                             @foreach($products as $product)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $product->category->name }}</td>
+                                    <td>{{ $product->category?->name }}</td>
                                     <td>{{ truncateString($product->name, 35) }}</td>
                                     <td>${{ $product->selling_price }}</td>
                                     <td>

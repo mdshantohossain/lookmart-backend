@@ -15,17 +15,12 @@ class  CategoryService
             $inputs = collect($data)->except(['remove_image', '_method'])->toArray();
 
             if( !empty($data['remove_image']) && $data['remove_image'] == '1') {
-                $inputs['image'] = null;
+               if($category->image) removeImage($category->image);
             }
 
-            if(! empty($inputs['image'])) {
-                if($category?->image) {
-                    removeImage($category->image);
-                }
-
+            if(!empty($inputs['image'])) {
                 $inputs['image'] = getImageUrl($inputs['image'], 'admin/assets/uploaded-images/category-images/');
             }
-
 
             // Slug
             $inputs['slug'] = Str::slug($inputs['name']);
@@ -41,7 +36,7 @@ class  CategoryService
             return $category;
         } catch (\Exception $e) {
             DB::rollBack();
-            logger()->error($e);
+            report($e);
             return null;
         }
     }

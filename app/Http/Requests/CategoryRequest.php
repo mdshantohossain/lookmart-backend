@@ -23,17 +23,21 @@ class CategoryRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'image' => 'image|nullable|mimes:jpeg,png,jpg,gif,svg',
             'status' => [ 'required', Rule::in([0, 1])],
             'remove_image' => 'numeric|nullable',
         ];
 
         if ($this->isMethod('put')) {
             // update
+            if ($this->remove_image == 1) {
+                $rules['image'] = 'image|required|mimes:jpeg,png,jpg,gif,svg';
+            }
+
             $rules['name'] = ['required', Rule::unique('categories', 'name')->ignore($this->route('category')?->id)];
         } else {
             // create
             $rules['name'] = [ 'required', Rule::unique('categories', 'name')];
+            $rules['image'] = 'image|required|mimes:jpeg,png,jpg,gif,svg';
         }
 
         return $rules;

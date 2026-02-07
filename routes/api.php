@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\CategoryController;
@@ -29,12 +30,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout',  [LoginController::class, 'logout']);
 });
 
+Route::get('/brands', [BrandController::class, 'getBrands']);
 Route::get('/categories', [CategoryController::class, 'getAllCategories']);
 Route::get('/exclusive-products', [ProductController::class, 'getExclusiveProducts']);
 Route::get('/trending-products', [ProductController::class, 'getTrendingProducts']);
 Route::get('/category-products', [ProductController::class, 'getCategoryProducts']);
 Route::get('/sub-category-products', [ProductController::class, 'getSubCategoryProducts']);
 Route::get('/search-products', [SearchController::class, 'getSearchProducts']);
+
+// filter
+Route::get('/filter-products', [SearchController::class, 'filterProducts']);
 
 // get products slug for ssg
 Route::get('/products/slugs', [ProductController::class, 'getProductsSlugs']);
@@ -56,6 +61,7 @@ Route::post('/auth/refresh-token', [LoginController::class, 'refreshToken']);
 
 // place order
 Route::post('/place-order', [OrderController::class, 'placeOrder']);
+Route::post('/signin/or/signup', [LoginController::class, 'signinOrSignup']);
 
 // wishlist
 Route::post('/wishlist-add', [WishlistController::class, 'store']);
