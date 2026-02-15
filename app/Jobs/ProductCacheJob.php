@@ -33,7 +33,7 @@ class ProductCacheJob implements ShouldQueue
 
     protected function rebuildProductCache(): void
     {
-        $cacheKey = "product_detail:$this->slug";
+        $cacheKey = "product_detail:{$this->slug}";
 
         Redis::del($cacheKey);
 
@@ -52,6 +52,8 @@ class ProductCacheJob implements ShouldQueue
             return;
         }
 
+        $product->policies = $product->policies()->get();
+
         Redis::set($cacheKey, json_encode([
             'success' => true,
             'data' => $product,
@@ -61,7 +63,7 @@ class ProductCacheJob implements ShouldQueue
     // product's related product
     protected function rebuildRelatedProductsCache(): void
     {
-        $cacheKey = "related_products:$this->slug";
+        $cacheKey = "related_products:{$this->slug}";
 
         Redis::del($cacheKey);
 

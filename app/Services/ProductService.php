@@ -129,6 +129,7 @@ class ProductService
                 }
             }
 
+
             // variant process
             $variants = collect($data['variants'] ?? [])->map(function ($variant) use ($storedProduct) {
                 $variantImage = null;

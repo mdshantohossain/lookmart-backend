@@ -20,7 +20,6 @@ class ProductController extends Controller
     protected string $redisKey = 'products',
         $exclusiveRedisKey = 'exclusive-products',
         $trendingRedisKey = 'trending-products',
-        $redisField = 'all',
         $redisSlugKey = "slugs";
 
     // get exclusive section product on frontend
@@ -29,8 +28,7 @@ class ProductController extends Controller
         $cached = Redis::get($this->exclusiveRedisKey);
 
         if($cached){
-            $products = json_decode($cached);
-
+            return response()->json(json_decode($cached));
         } else {
             $products = Product::with('variants')
                 ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
@@ -42,21 +40,25 @@ class ProductController extends Controller
                 ->take(30)
                 ->get();
 
+            $response = [
+                'success' => true,
+                'data' => $products
+            ];
+
             // caching
-            Redis::set($this->exclusiveRedisKey, json_encode($products));
+            Redis::set($this->exclusiveRedisKey, json_encode($response));
         }
 
-        return response()->json($products);
+        return response()->json($response);
     }
 
     // get tending section product on frontend
     public function getTrendingProducts(): JsonResponse
     {
-        $cached = Redis::get($this->trendingRedisKey, $this->redisField);
+        $cached = Redis::get($this->trendingRedisKey);
 
         if($cached) {
-            $products = json_decode($cached);
-
+            return response()->json(json_decode($cached));
         } else {
             $products = Product::with('variants')
                 ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
@@ -69,10 +71,15 @@ class ProductController extends Controller
                 ->take(30)
                 ->get();
 
-
+             $response = [
+                'success' => true,
+                'data' => $products
+            ];
+            // caching
+            Redis::set($this->exclusiveRedisKey, json_encode($response));
         }
 
-        return response()->json($products);
+        return response()->json($response);
     }
 
     public function index()
@@ -126,13 +133,13 @@ class ProductController extends Controller
         return redirect('/products')->with('success', 'Product created successfully');
     }
 
-    public function show(Product $product): View
+    public function show(Product $product)
     {
         // check permission of request user
         isAuthorized('product show');
 
         return view('admin.product.detail', [
-            'product' =>  $product->load('otherImages')
+            'product' =>  $product->load(['variants', 'otherImages'])
         ]);
     }
 
@@ -233,13 +240,13 @@ class ProductController extends Controller
 
         Redis::del($this->trendingRedisKey);
 
-        Redis::del("category_products:$product->category->slug");
+        Redis::del("category_products:{$product->category->slug}");
 
         if ($product->sub_category_id) {
-            Redis::del("subcategory_products:$product->subCategory->slug");
+            Redis::del("subcategory_products:{$product->subCategory->slug}");
         }
 
-        $cacheKey = "product_detail:$product->slug";
+        $cacheKey = "product_detail:{$product->slug}";
 
         if(Redis::exists($cacheKey)) {
             Redis::del($cacheKey);
@@ -255,7 +262,7 @@ class ProductController extends Controller
                     'message' => 'Slug is missing',
                 ], 419);        }
 
-            $cacheKey = "product_detail:$slug";
+            $cacheKey = "product_detail:{$slug}";
 
             if (Redis::exists($cacheKey)) {
                 return response()->json(json_decode(Redis::get($cacheKey)));
@@ -288,6 +295,7 @@ class ProductController extends Controller
             Redis::set($cacheKey, json_encode($response));
 
             return response()->json($response);
+
         } catch (\Throwable $th) {
           report($th);
           return response()->json([

@@ -47,10 +47,15 @@ class ProductCreateRequest extends FormRequest
             'is_featured' => 'nullable|in:0,1',
             'is_trending' => 'nullable|in:0,1',
             'is_free_delivery' => 'nullable|in:0,1',
-            'variants' => 'nullable|array',
+
+            'variants' => 'required|array|min:1',
+            'variants.*.vid' => 'nullable|string',
+            'variants.*.variant_key' => 'required|string',
             'variants.*.sku' => 'nullable|string',
-            'variants.*.price' => 'nullable|numeric',
-            'variants.*.image' => 'nullable'
+            'variants.*.buy_price' => 'nullable|numeric',
+            'variants.*.selling_price' => 'nullable|numeric',
+            'variants.*.suggested_price' => 'nullable|numeric',
+            'variants.*.image' => 'required'
         ];
 
         if($this->isMethod('put') || $this->isMethod('patch')) {
@@ -85,6 +90,19 @@ class ProductCreateRequest extends FormRequest
             'category_id.required' => 'Category field is required',
             'sub_category_id.required' => 'Sub category field  is required',
             'other_images.required' => 'Gallery images field is required',
+
+            // variants array
+            'variants.required' => 'At least one variant is required',
+            'variants.min' => 'At least one variant is required',
+
+            // per variant fields
+            'variants.*.variant_key.required' => 'Variant key field is required',
+
+            'variants.*.buy_price.numeric' => 'Variant buy price must be a number',
+            'variants.*.selling_price.numeric' => 'Variant selling price must be a number',
+            'variants.*.suggested_price.numeric' => 'Variant suggested price must be a number',
+
+            'variants.*.image.required' => 'Variant image field is required',
         ];
     }
 }
