@@ -8,14 +8,15 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class ProcessProductImagesAndVariantsJob implements ShouldQueue
 {
     use Dispatchable, Queueable, SerializesModels;
 
     protected int $productId;
-    protected $otherImages;
-    protected $variants;
+    protected array $otherImages;
+    protected array $variants;
 
     public function __construct($productId, array $otherImages, array $variants)
     {
@@ -24,6 +25,9 @@ class ProcessProductImagesAndVariantsJob implements ShouldQueue
         $this->variants = $variants;
     }
 
+    /**
+     * @throws Throwable
+     */
     public function handle(): void
     {
         DB::transaction(function () {

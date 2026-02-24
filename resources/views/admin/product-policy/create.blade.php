@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3>Category create form</h3>
+                        <h3>Product policy create form</h3>
                         <a href="{{ route('product-policies.index') }}" class="btn btn-sm btn-secondary waves-effect waves-light">
                             Back
                         </a>
@@ -78,7 +78,18 @@
                 container.empty();
                 container.append(img);
             }
+
             reader.readAsDataURL(file);
+        });
+
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+
+            const button = $('button[type="submit"]');
+
+            button.attr('disabled', true);
+            button.text('Product policy creating...');
+
         });
     </script>
 @endpush

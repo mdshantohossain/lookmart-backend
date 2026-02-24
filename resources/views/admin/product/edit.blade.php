@@ -17,19 +17,28 @@
             </div>
         </div>
 
+        @if($errors)
+            @foreach($errors->all() as $error)
+                <span class="text-danger">{{ $errors }}</span>
+            @endforeach
+        @endif
         <div class="col-xl-12 mx-auto">
             <form method="POST" action="{{ route('products.update', $product->slug) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
+                {{--hidden input--}}
+                <input type="hidden" name="remove_other_images" />
+                <input type="hidden" name="remove_variants" />
+                <input type="hidden" name="remove_variant_images" />
+                <input type="hidden" name="variants_json" id="variants_json">
+                <input type="hidden" name="cj_id" value="{{ $product->cj_id }}">
+
+
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Basic Information</h4>
                         <p class="card-title-desc">Fill all information below</p>
-
-                        {{-- Hidden values --}}
-                        <input type="hidden" id="cj_id" value="{{ $product->cj_id }}" name="cj_id" />
-                        <input type="hidden" id="buy_price" name="buy_price" />
 
                         <div class="row g-3">
 
@@ -156,7 +165,7 @@
                                 </label>
                                 <input type="file" class="form-control" id="video_thumbnail" name="video_thumbnail"
                                        accept="video/*" />
-                                <input type="hidden" id="remove_previous_video_thumbnail" name="remove_previous_video_thumbnail" value="0" />
+                                <input type="hidden" id="remove_video_thumbnail" name="remove_video_thumbnail" value="0" />
                                 @error('video_thumbnail')
                                 <span id="video_thumbnail_error_message" class="text-danger">{{ $message }}</span>
                                 @enderror
@@ -188,19 +197,21 @@
                                 @enderror
                                 <div class="other_image_preview">
                                     @foreach($product->otherImages as $otherImage)
-                                        <div class="position-relative d-inline-block" style="width:100px;height:100px;margin:5px;">
-                                            <img src="{{ $otherImage->image }}" class="img-thumbnail rounded-2"
-                                                 style="width:100px;height:100px;object-fit:cover;border-radius:8px;"
-                                                 loading="lazy" alt="product" referrerpolicy="no-referrer" />
-                                            <i data-id="{{ $otherImage->id }}"
-                                               class="position-absolute top-0 end-0 remove-image fa fa-times-circle fa-lg bg-light rounded-circle text-danger"
-                                               style="cursor:pointer"></i>
-                                            <input type="hidden" name="remove_other_image[{{$otherImage->id}}]" value="0" />
+                                        <div class="position-relative d-inline-block other-image-wrapper" style="width:100px;height:100px;margin:5px;"  data-id="{{ $otherImage->id }}">
+                                            <img
+                                                src="{{ $otherImage->image }}"
+                                                class="img-thumbnail rounded-2"
+                                                style="width:100px;height:100px;object-fit:cover;border-radius:8px;"
+                                                loading="lazy" alt="product" referrerpolicy="no-referrer"
+                                            />
+                                            <i
+                                               class="position-absolute top-0 end-0 fa fa-times-circle fa-lg bg-light rounded-circle text-danger remove-image-btn"
+                                               style="cursor:pointer">
+                                            </i>
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
-
 
                             <div class="col-md-4">
                                 <label for="variants_title" class="form-label">Variants Title</label>
@@ -241,14 +252,16 @@
                                         </thead>
                                         <tbody id="variantTableBody">
                                         @foreach($product->variants as $key => $variant)
-                                            <tr class="variant-item">
+                                            <tr class="variant-item" data-id="{{ $variant->id }}">
                                                 <td>
-                                                    <input type="file" name="variants[{{ $key }}][image]" accept="image/*" class="form-control form-control-sm variant-image-input mb-2" />
-                                                    <input type="hidden" name="variants[{{ $key }}][id]" value="{{ $variant->id }}" />
+                                                    <input type="file" accept="image/*" name="variant_images[]" class="form-control form-control-sm variant-image-input mb-2" />
+                                                    <input type="hidden" value="{{ $variant->vid }}" class="vid">
+                                                    <input type="hidden" value="{{ $variant->sku }}" class="sku">
+                                                    <input type="hidden" value="{{ $variant->suggested_price }}" class="suggested-price">
 
                                                     @if($variant->image)
                                                         <div class="variant-preview position-relative mt-1" style="width:60px;">
-                                                            <input type="hidden" name="variants[{{ $key }}][image]" value="{{ $variant['image'] }}" />
+                                                            <input type="hidden" value="{{ $variant['image'] }}" name="variant_images[]"  class="variant-image-hidden" />
 
                                                             <img src="{{ $variant->image }}" class="img-thumbnail" style="max-width:60px;" alt="">
                                                             <i class="fa fa-times-circle text-danger remove-variant-image"
@@ -256,19 +269,23 @@
                                                             </i>
                                                         </div>
                                                     @endif
-
-                                                <!-- hidden value for remove image -->
-                                                    <input type="hidden" name="variants[{{ $key }}][remove_image]" class="remove-image-field" value="0">
                                                 </td>
-                                                <td><input type="text" name="variants[{{ $key }}][variant_key]" value="{{ $variant->variant_key }}" class="form-control form-control-sm" placeholder="Color - Size" /></td>
-                                                <td><input type="number" step="0.01" name="variants[{{ $key }}][buy_price]" value="{{ $variant->buy_price }}" class="form-control form-control-sm" placeholder="0.00" /></td>
-                                                <td><input type="number" step="0.01" name="variants[{{ $key }}][suggested_price]" disabled value="{{ $variant->suggested_price }}" class="form-control form-control-sm" placeholder="0.00" readonly /></td>
-                                                <td><input type="number" step="0.01" name="variants[{{ $key }}][selling_price]" value="{{ $variant->selling_price }}" class="form-control form-control-sm" placeholder="0.00" /></td>
                                                 <td>
-                                                    <button type="button" class="btn btn-danger btn-sm remove-variant"><i class="fa fa-trash"></i></button>
+                                                    <input type="text" value="{{ $variant->variant_key }}" class="form-control form-control-sm variant-key" placeholder="Color - Size" />
+                                                </td>
+                                                <td><input type="number" step="0.01" value="{{ $variant->buy_price }}" class="form-control form-control-sm buy-price" placeholder="0.00" /></td>
+                                                <td>
+                                                    @if($variant->suggested_price)
+                                                        <span>{{ $variant->suggested_price }}</span>
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </td>
+                                                <td><input type="number" step="0.01" value="{{ $variant->selling_price }}" class="form-control form-control-sm selling-price" placeholder="0.00" /></td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm remove-variant" data-id="{{ $variant->id }}"><i class="fa fa-trash"></i></button>
                                                 </td>
                                             </tr>
-                                            <input type="hidden" name="remove_variants[{{ $variant->id }}]" value="0" />
                                         @endforeach
                                         </tbody>
                                     </table>
@@ -440,24 +457,24 @@
             });
 
         // Apply on file inputs (change)
-        $('#image_thumbnail, #video_thumbnail, #other_images')
-            .on('change', function () {
+        $('#image_thumbnail, #video_thumbnail, #other_images').on('change', function () {
                 clearError(this.id);
             });
 
         // --- Handle Add Variant manually ---
         $(document).on('click', '#addVariantBtn', function () {
-            const rowCount = $('#variantTableBody tr').length;
             const newRow = `
                   <tr class="variant-item">
                     <td>
-                      <input type="file" name="variants[${rowCount + 1}][image]" accept="image/*" class="form-control form-control-sm variant-image-input" />
+                      <input type="file" accept="image/*" name="variant_images[]" class="form-control form-control-sm variant-image-input mb-1" />
 
                     </td>
-                  <td><input type="text" name="variants[${rowCount + 1}][variant_key]" class="form-control form-control-sm" placeholder="Color - Size" /></td>
-                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][buy_price]" class="form-control form-control-sm" placeholder="0.00" /></td>
-                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][suggested_price]" class="form-control form-control-sm" placeholder="0.00" readonly /></td>
-                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][selling_price]" class="form-control form-control-sm" placeholder="0.00" /></td>
+                    <td><input type="text" class="form-control form-control-sm variant-key" placeholder="Color - Size" /></td>
+                    <td><input type="number" step="0.01" class="form-control form-control-sm buy-price" placeholder="0.00" /></td>
+                    <td>
+                        <span>N/A</span>
+                    </td>
+                    <td><input type="number" step="0.01" class="form-control form-control-sm selling-price" placeholder="0.00" /></td>
                     <td><button type="button" class="btn btn-danger btn-sm remove-variant"><i class="fa fa-trash"></i></button></td>
                   </tr>`;
             $('#variantTableBody').append(newRow);
@@ -490,21 +507,6 @@
                 };
                 reader.readAsDataURL(file);
             }
-        });
-
-        // remove variant image
-        $(document).on('click', '.remove-variant-image', function () {
-            const wrapper = $(this).closest('.variant-preview');
-            wrapper.next('.remove-image-field').val(1);
-            wrapper.prev('.variant-image-input').val(''); // reset file input
-            wrapper.remove();
-        });
-
-        // remove variant row
-        $(document).on('click', '.remove-variant', function () {
-            let tr = $(this).closest('tr');
-            tr.next('input').val(1);
-            tr.remove();
         });
 
         $(document).ready(function () {
@@ -605,7 +607,17 @@
             });
 
             //  Other Images Upload
+            const dataTransfer = new DataTransfer();
             $('#other_images').on('change', function () {
+                for(let file of this.files) {
+                    dataTransfer.items.add(file)
+                }
+
+                this.files = dataTransfer.files;
+
+                $('.other_image_preview').empty();
+
+                $('#other_image_error_message').text('');
                 previewFileInput(this, '.other_image_preview', 100, 100);
             });
 
@@ -615,18 +627,16 @@
                 const dataId = $(this).data('id');
 
                 if(dataId) {
-                   const input = $(this).next('input');
-                    input.val(1);
+                    $(this).next('input').val(1);
                     $(this).closest('div').addClass("d-none"); // add d-none class to remove image
 
                 } else {
-                    $('#remove_previous_video_thumbnail').val(1);
+                    $('#remove_video_thumbnail').val(1);
                     $(this).closest('div').remove(); // remove thumbnail container
                 }
 
                 if(imgUrl) {
                     $(`input[value="${imgUrl}"]`).remove(); // remove input  value
-
                 }
             });
 
@@ -673,6 +683,89 @@
 
             // Summernote Init
             $('#long_description').summernote({ height: 200, placeholder: 'Enter product long description...' });
+
+            // remove other images
+            let removeOtherImagesId = [];
+            $(document).on('click', '.remove-image-btn', function () {
+                const wrapper = $(this).closest('.other-image-wrapper');
+                const id = wrapper.data('id');
+
+                if(id) {
+                    removeOtherImagesId.push(id);
+                }
+
+                wrapper.remove();
+            });
+
+            // remove variants
+            let removeVariantsImage = [];
+            $(document).on('click', '.remove-variant-image', function () {
+                const wrapper = $(this).closest('.variant-preview');
+
+                const id = $(this).data('id');
+
+                if(id) {
+                    removeVariantsImage.push(id)
+                }
+
+                wrapper.prev('.variant-image-input').val(''); // reset file input
+                wrapper.remove();
+            });
+
+            // remove variant images and row
+            let removeVariantsId = [];
+            $(document).on('click', '.remove-variant', function () {
+                let tr = $(this).closest('tr');
+                let id = $(this).data('id')
+
+                // if id exists then push for delete
+                if(id) {
+                    removeVariantsId.push(id)
+                }
+                tr.remove();
+            });
+
+            // handle form submission
+            $('form').on('submit', function (e) {
+                e.preventDefault();
+
+                let variants = [];
+
+                $('.variant-item').each(function (index) {
+                    variants.push({
+                        id: $(this).data('id') ?? null,
+                        vid: $(this).find('.vid').val() ?? null,
+                        sku: $(this).find('.sku').val() ?? null,
+                        variant_key: $(this).find('.variant-key').val() ?? null,
+                        buy_price: $(this).find('.buy-price').val() ?? null,
+                        selling_price: $(this).find('.selling-price').val() ?? null,
+                        suggested_price: $(this).find('.suggested-price').val() ?? null,
+                        image: index,
+                    })
+                });
+
+                // assign all variants after submit the form.
+                $('#variants_json').val(JSON.stringify(variants));
+
+                // assign all other images id for delete
+                $('input[name="remove_other_images"]').val(JSON.stringify(removeOtherImagesId));
+
+                // assign all variant image id for delete
+                $('input[name="remove_variant_images"]').val(JSON.stringify(removeVariantsImage));
+
+                // assign all variant id for delete
+                $('input[name="remove_variants"]').val(JSON.stringify(removeVariantsId));
+
+                const button = $('button[type="submit"]');
+
+                // finally submit the form
+                this.submit();
+
+                // disable submit button and show context text
+                button.text('Product updating...');
+                button.attr('disabled', true);
+            });
+
         });
     </script>
 

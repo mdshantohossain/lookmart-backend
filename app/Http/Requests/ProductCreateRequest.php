@@ -15,6 +15,19 @@ class ProductCreateRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // decode variants JSON
+
+        if($this->has('variants_json')) {
+            $variants = json_decode($this->input('variants_json'), true);
+
+            $this->merge([
+                'variants' => $variants
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -31,9 +44,9 @@ class ProductCreateRequest extends FormRequest
             'buy_price' => 'nullable|string',
             'discount' => ['nullable', 'regex:/^\d{1,3}%$/'],
             'video_thumbnail' => 'nullable|file|mimetypes:video/*|mimes:mp4,mov,avi,wmv',
-            'remove_other_image' => 'nullable|array',
-            'remove_other_image.*' => 'in:0,1',
-            'remove_variants' => 'nullable|array',
+            'remove_video_thumbnail' => 'nullable|in:0,1',
+            'remove_other_images' => 'nullable|string',
+            'remove_variants' => 'nullable|string',
             'remove_variants.*' => 'in:0,1',
             'short_description' => 'required|string',
             'long_description' => 'nullable|string',
@@ -48,14 +61,17 @@ class ProductCreateRequest extends FormRequest
             'is_trending' => 'nullable|in:0,1',
             'is_free_delivery' => 'nullable|in:0,1',
 
+            'variants_json' => 'required|string',
             'variants' => 'required|array|min:1',
+            'variants.*.id' => 'nullable|numeric|exists:product_variants,id',
             'variants.*.vid' => 'nullable|string',
             'variants.*.variant_key' => 'required|string',
             'variants.*.sku' => 'nullable|string',
             'variants.*.buy_price' => 'nullable|numeric',
             'variants.*.selling_price' => 'nullable|numeric',
             'variants.*.suggested_price' => 'nullable|numeric',
-            'variants.*.image' => 'required'
+            'variants.*.image' => 'nullable',
+            'variant_images' => 'nullable|array',
         ];
 
         if($this->isMethod('put') || $this->isMethod('patch')) {
@@ -78,8 +94,8 @@ class ProductCreateRequest extends FormRequest
         }
 
         $rules['quantity'] = ($this->product_owner == '0')
-            ? 'required|integer|min:0'
-            : 'nullable|integer|min:0';
+                                ? 'required|integer|min:0'
+                                : 'nullable|integer|min:0';
 
         return $rules;
     }
@@ -102,7 +118,6 @@ class ProductCreateRequest extends FormRequest
             'variants.*.selling_price.numeric' => 'Variant selling price must be a number',
             'variants.*.suggested_price.numeric' => 'Variant suggested price must be a number',
 
-            'variants.*.image.required' => 'Variant image field is required',
         ];
     }
 }

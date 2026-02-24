@@ -13,7 +13,7 @@ class ProductObserver
     public function created(Product $product): void
     {
         RevalidateProductPageJob::dispatch($product->slug);
-        ProductCacheJob::dispatch($product->id, $product->slug, $product->category_id);
+//        ProductCacheJob::dispatch($product->id, $product->slug, $product->category_id);
     }
 
     /**
@@ -27,7 +27,7 @@ class ProductObserver
             'total_day_to_delivery', 'variants_title'
         ])) {
             RevalidateProductPageJob::dispatch($product->slug);
-            ProductCacheJob::dispatch($product->id, $product->slug, $product->category_id);
+//            ProductCacheJob::dispatch($product->id, $product->slug, $product->category_id);
         }
     }
 

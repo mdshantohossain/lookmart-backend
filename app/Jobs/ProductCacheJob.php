@@ -37,12 +37,7 @@ class ProductCacheJob implements ShouldQueue
 
         Redis::del($cacheKey);
 
-        $product = Product::with([
-            'category',
-            'otherImages',
-            'variants',
-            'reviews.user',
-        ])
+        $product = Product::with(['category', 'otherImages', 'reviews' => fn ($query) => $query->latest(), 'reviews.user', 'variants'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('slug', $this->slug)
@@ -54,10 +49,14 @@ class ProductCacheJob implements ShouldQueue
 
         $product->policies = $product->policies()->get();
 
-        Redis::set($cacheKey, json_encode([
+        $response = [
             'success' => true,
             'data' => $product,
-        ]));
+        ];
+
+        logger()->info($response);
+
+        Redis::set($cacheKey, json_encode($response));
     }
 
     // product's related product
@@ -69,7 +68,7 @@ class ProductCacheJob implements ShouldQueue
 
         // Fetch related products by product category
         $relatedProducts = Product::with('variants')
-            ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
+            ->select(['id', 'category_id', 'name', 'slug', 'image_thumbnail', 'sku',
                 'video_thumbnail', 'selling_price', 'original_price', 'discount',
                 'total_day_to_delivery', 'total_sold', 'is_free_delivery']) // add more field if needed
             ->where('category_id', $this->categoryId)
