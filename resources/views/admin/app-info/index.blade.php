@@ -1,18 +1,21 @@
 @extends('admin.layouts.master')
 
-@section('title', 'App Manage')
+@section('title', 'App Info')
 
 @section('body')
     <div class="row">
         <div class="col-md-8 mx-auto">
             <div class="card">
                     <div class="card-body">
-                        <a class="h4 d-block mb-2" role="button">
-                            App manage
-                        </a>
+                        <span class="h4 d-block mb-2" >
+                            Application information
+                        </span>
 
-                        <form method="POST" action="{{ route('app.manage') }}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ url('/app-info') }}" enctype="multipart/form-data">
                             @csrf
+                            @if(!empty($app))
+                                @method('PUT')
+                            @endif
                             <div class="mb-3">
                                 <label class="form-label">App name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" value="{{ $app?->app_name }}" name="app_name" placeholder="Enter your app name" />

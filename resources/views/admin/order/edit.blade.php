@@ -9,12 +9,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="">Order Edit</h4>
-                        <a href="{{ route('order.index') }}" class="btn btn-primary waves-effect waves-light">
+                        <a href="{{ route('orders.index') }}" class="btn btn-primary waves-effect waves-light">
                             Back
                         </a>
                     </div>
 
-                    <form action="{{ route('order.update', $order->slug) }}" method="POST">
+                    <form action="{{ route('orders.update', $order->slug) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -28,7 +28,7 @@
                         </div>
                         <div class="row mb-3">
                             <label for="">Order Total</label>
-                            <input type="text" class="form-control" readonly value="{{ $order->order_total. ' BDT' }}" />
+                            <input type="text" class="form-control" readonly value="{{ '৳'. $order->order_total }}" />
                         </div>
 
                         <div class="row mb-3">

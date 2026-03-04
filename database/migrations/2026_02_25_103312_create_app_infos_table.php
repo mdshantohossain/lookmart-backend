@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('app_manages', function (Blueprint $table) {
+        Schema::create('app_infos', function (Blueprint $table) {
             $table->id();
             $table->string('app_name');
             $table->text('logo')->nullable();
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('app_manages');
+        Schema::dropIfExists('app_infos');
     }
 };

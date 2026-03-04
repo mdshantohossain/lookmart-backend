@@ -270,7 +270,7 @@
                                     <table class="table table-bordered align-middle">
                                         <thead class="table-light">
                                         <tr>
-                                            <th>Image</th>
+                                            <th>Image<span class="text-danger">*</span></th>
                                             <th>Variant Key<span class="text-danger">*</span></th>
                                             <th>Buy Price</th>
                                             <th>Suggested Price</th>
@@ -298,7 +298,7 @@
 
                                                       @if(!empty($variant['image']))
                                                           <div class="variant-preview position-relative mt-1" style="width:60px;">
-                                                              <img src="{{ $variant['image'] }}" class="img-thumbnail" width="60" height="60" style="object-fit:cover;border-radius:6px;" />
+                                                              <img src="{{ $variant['image'] }}" class="img-thumbnail" alt="variant image" width="60" height="60" style="object-fit:cover;border-radius:6px;" />
                                                               <i class="fa fa-times-circle text-danger remove-variant-image"
                                                                  style="cursor:pointer; position:absolute; top:-2px; right:-2px;">
                                                               </i>

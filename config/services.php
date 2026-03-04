@@ -56,5 +56,9 @@ return [
     ],
     'cj' => [
         'cj_access_token' => env('CJ_ACCESS_TOKEN'),
+    ],
+    'payment' => [
+        'url' => env('PAYMENT_URL'),
+        'api_key' => env('PAYMENT_API_KEY'),
     ]
 ];

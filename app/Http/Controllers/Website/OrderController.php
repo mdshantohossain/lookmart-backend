@@ -18,44 +18,8 @@ class OrderController extends Controller
     public function index()
     {
         return view('admin.order.index', [
-            'orders' => Order::with('user')->get(),
+            'orders' => Order::with('user')->latest()->get(),
         ]);
-    }
-
-    public function store(Request $request, OrderService $orderService, MailService $mailService)
-    {
-        // check permission of current user
-        isAuthorized('order destroy');
-
-        $user = $orderService->ensureUserExistsAndAuthenticated($request, $mailService);
-
-        if ($user->role != 'user') {
-            abort(403);
-        }
-
-        // get current delivery charge
-        $shippingCost = getDeliveryCharge($request->delivery_method);
-
-        // validate delivery address
-        $orderService->validateDeliveryAddress($request, $user);
-
-        // Update phone if missing
-        $orderService->updatePhoneIfMissing($user, $request->phone);
-
-        if($request->payment_method == 0 && $shippingCost == 0) {
-            // order placed
-            $order = $orderService->placeCashOrder($user, $request, $shippingCost);
-
-            // create order detail and remove cart item
-            $orderService->handleCartItems($order);
-
-            return redirect('/profile')->with('success', 'Order placed successfully');
-        } else {
-            // store session data to handle online  payment
-            $orderService->storeSessionData($request, $shippingCost);
-
-            return redirect('/online-payment');
-        }
     }
 
     public function show(Order $order): View

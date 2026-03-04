@@ -69,13 +69,15 @@ class RolePermissionsSeeder extends Seeder
             'review edit',
             'review destroy',
 
-            'app-management create',
-            'app-management update',
-            'app-management destroy',
+            'app-info module',
+            'app-info store',
 
             'app-credential module',
             'app-credential store',
             'app-credential update',
+
+            'mail-setting module',
+            'mail-setting store',
 
             'shipping management module',
 

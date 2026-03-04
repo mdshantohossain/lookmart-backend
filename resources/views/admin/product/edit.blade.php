@@ -17,11 +17,6 @@
             </div>
         </div>
 
-        @if($errors)
-            @foreach($errors->all() as $error)
-                <span class="text-danger">{{ $errors }}</span>
-            @endforeach
-        @endif
         <div class="col-xl-12 mx-auto">
             <form method="POST" action="{{ route('products.update', $product->slug) }}" enctype="multipart/form-data">
                 @csrf
@@ -45,10 +40,10 @@
                             <!-- Category -->
                             <div class="col-md-6">
                                 <label for="categoryId" class="form-label">
-                                    Category <span class="text-danger">*</span>
+                                    Category<span class="text-danger">*</span>
                                 </label>
                                 <select name="category_id" class="form-select" id="category">
-                                    <option value="">Select</option>
+                                    <option value="">Choose category</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ $category->id == $product->category_id ? 'selected' : '' }}>
                                             {{ $category->name }}
@@ -60,11 +55,11 @@
                                 @enderror
                             </div>
 
-                            <!-- Sub-category -->
+                            <!-- Sub category -->
                             <div class="col-md-6">
                                 <label for="subCategoryId" class="form-label">Sub category</label>
                                 <select name="sub_category_id" id="subCategoryId" class="form-select">
-                                    <option value="">Select</option>
+                                    <option value="">Choose sub category</option>
                                     @foreach($subCategories as $subCategory)
                                         <option value="{{ $subCategory->id }}" {{ $subCategory->id == $product->sub_category_id ? 'selected' : '' }}>
                                             {{ $subCategory->name }}
@@ -79,7 +74,7 @@
                             <!-- Product Name -->
                             <div class="col-md-12">
                                 <label for="name" class="form-label">
-                                    Product Name <span class="text-danger">*</span>
+                                    Product Name<span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="name" name="name"
                                        value="{{ $product->name }}" placeholder="Enter product name">
@@ -110,7 +105,7 @@
 
                             <div class="col-md-4">
                                 <label for="selling_price" class="form-label">
-                                    Selling Price <span class="text-danger">*</span>
+                                    Selling Price<span class="text-danger">*</span>
                                 </label>
                                 <input type="number" step="0.01" class="form-control" id="selling_price"
                                        name="selling_price" value="{{ $product->selling_price }}" placeholder="0.00">
@@ -122,7 +117,7 @@
                             <!-- SKU -->
                             <div class="col-md-6">
                                 <label for="sku" class="form-label">
-                                    SKU <span class="text-danger">*</span>
+                                    SKU<span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="sku" name="sku" readonly
                                        value="{{ $product->sku }}" placeholder="Enter product unique SKU">
@@ -144,7 +139,7 @@
                             <!-- Image thumbnail -->
                             <div class="col-md-3">
                                 <label for="image_thumbnail" class="form-label">
-                                    Image Thumbnail <span class="text-danger">*</span>
+                                    Image Thumbnail<span class="text-danger">*</span>
                                 </label>
                                 <input type="file" class="form-control" id="image_thumbnail" name="image_thumbnail"
                                        accept="image/*" />
@@ -188,7 +183,7 @@
                             <!-- Other Images -->
                             <div class="col-md-6">
                                 <label for="other_images" class="form-label">
-                                    Gallery Images <span class="text-danger">*</span>
+                                    Gallery Images<span class="text-danger">*</span>
                                 </label>
                                 <input type="file" class="form-control" id="other_images"
                                        name="other_images[]" multiple accept="image/*">
@@ -237,12 +232,21 @@
                             <!-- Variants Section -->
                             <div class="col-md-12 mt-4" id="variantSection">
                                 <h5 class="fw-bold mb-3">Product Variants</h5>
+
+                                @error('variants')
+                                    <div id="variants_error_message">
+                                        <div class="alert alert-danger mb-2">
+                                            {{ $message }}
+                                        </div>
+                                    </div>
+                                @enderror
+
                                 <div class="table-responsive">
                                     <table class="table table-bordered align-middle">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>Image</th>
-                                                <th>Variant Key</th>
+                                                <th>Image<span class="text-danger">*</span></th>
+                                                <th>Variant Key<span class="text-danger">*</span></th>
                                                 <th>Buy Price</th>
                                                 <th>Suggested Price</th>
                                                 <th>Selling Price</th>
@@ -646,8 +650,18 @@
                 const sellingPrice = $("#selling_price");
                 const rawDiscount = $('#discount').val().trim();
                 const discountError = $('#discountError');
+                const originalPriceErrorMessage = $('#original_price_error_message');
 
                 if (!originalPrice || !rawDiscount) return sellingPrice.val('');
+
+                if (!originalPrice || rawDiscount) return sellingPrice.val('');
+
+                if (sellingPrice || rawDiscount) {
+                    originalPriceErrorMessage.text('Original price field is required.');
+                    $('button[type="submit"]').attr('disabled', true);
+                } else {
+                    $('button[type="submit"]').attr('disabled', false);
+                }
 
                 if (!/^\d+(\.\d+)?%$/.test(rawDiscount)) {
                     discountError.text("Discount must be a valid percentage (e.g. 10%).");

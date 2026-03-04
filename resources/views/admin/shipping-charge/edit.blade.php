@@ -44,7 +44,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="formrow-firstname-input" class="form-label">Description</label>
+                            <label for="formrow-firstname-input" class="form-label">Note</label>
                            <textarea name="description" id="summernote" class="form-control" rows="5">{{ $shipping->description }}</textarea>
                             @error('description')
                             <div class="text-danger">{{ $message }}</div>

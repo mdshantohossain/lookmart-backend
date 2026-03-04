@@ -9,7 +9,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="">Order Detail</h4>
-                        <a href="{{ route('order.index') }}" class="btn btn-primary waves-effect waves-light">
+                        <a href="{{ route('orders.index') }}" class="btn btn-primary waves-effect waves-light">
                             Back
                         </a>
                     </div>
@@ -24,7 +24,7 @@
                         </tr>
                         <tr>
                             <th>Total Amount</th>
-                            <td>{{ number_format($order->order_total, 2) }} {{ $order->currency ?? 'BDT' }}</td>
+                            <td>{{ $order->currency ?? '৳' }}{{ number_format($order->order_total, 2) }}</td>
                         </tr>
                         <tr>
                             <th>Order Date</th>
@@ -82,11 +82,11 @@
                         </tr>
                         <tr>
                             <th>Delivery Charge</th>
-                            <td>{{ $order->delivery_charge != 0 ? 'TK.'. $order->delivery_charge : 'Free Delivery' }}</td>
+                            <td>{{ $order->delivery_charge != 0 ? '৳'. $order->delivery_charge : 'Free Delivery' }}</td>
                         </tr>
                         <tr>
                             <th>Delivery Date</th>
-                            <td>{{ $order->delivery_date->format('d M Y, h:i A') ?? 'N/A' }}</td>
+                            <td>{{ $order->delivery_date?->format('d M Y, h:i A') ?? 'N/A' }}</td>
                         </tr>
                         </tbody>
                     </table>
@@ -126,7 +126,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $orderDetail->product->name }}</td>
-                                <td>TK.{{ $orderDetail->product->selling_price }}</td>
+                                <td>৳.{{ $orderDetail->product->selling_price }}</td>
                                 <td>{{$orderDetail->quantity }}</td>
                             </tr>
                         @endforeach

@@ -39,8 +39,8 @@ class ProductCreateRequest extends FormRequest
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
             'name' => 'required',
-            'original_price' => 'nullable|numeric|min:0|max:999999999.99',
-            'selling_price' => 'required|numeric|min:0|max:999999999.99',
+            'original_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
             'buy_price' => 'nullable|string',
             'discount' => ['nullable', 'regex:/^\d{1,3}%$/'],
             'video_thumbnail' => 'nullable|file|mimetypes:video/*|mimes:mp4,mov,avi,wmv',
@@ -70,7 +70,7 @@ class ProductCreateRequest extends FormRequest
             'variants.*.buy_price' => 'nullable|numeric',
             'variants.*.selling_price' => 'nullable|numeric',
             'variants.*.suggested_price' => 'nullable|numeric',
-            'variants.*.image' => 'nullable',
+            'variants.*.image' => 'required',
             'variant_images' => 'nullable|array',
         ];
 
@@ -113,6 +113,7 @@ class ProductCreateRequest extends FormRequest
 
             // per variant fields
             'variants.*.variant_key.required' => 'Variant key field is required',
+            'variants.*.image.required' => 'Variant image field is required',
 
             'variants.*.buy_price.numeric' => 'Variant buy price must be a number',
             'variants.*.selling_price.numeric' => 'Variant selling price must be a number',

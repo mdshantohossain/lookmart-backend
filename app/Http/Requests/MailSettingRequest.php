@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AppManageRequest extends FormRequest
+class MailSettingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +22,13 @@ class AppManageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'app_name' => 'required|string',
-            'logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
-            'favicon' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
-            'address' => 'nullable|string',
-            'phone' => 'required|string',
-            'email' => 'required|email',
-            'description' => 'nullable|string',
+            'mail_host' => ['required', 'string', 'max:255'],
+            'mail_port' => ['required', 'numeric'],
+            'mail_username' => ['required', 'string', 'max:255'],
+            'mail_password' => ['required', 'string', 'max:255'],
+            'mail_encryption' => ['nullable', 'in:tls,ssl'],
+            'mail_from_address' => ['required', 'email', 'max:255'],
+            'mail_from_name' => ['required', 'string', 'max:255'],
         ];
     }
 }

@@ -116,13 +116,17 @@
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
 
-                        @can('app-management module')
-                             <li><a href="{{ route('app.manage') }}" key="t-alerts">App Manage</a></li>
+                        @can('app-info module')
+                             <li><a href="{{ route('app.info') }}" key="t-alerts">App Info</a></li>
+                        @endcan
+
+                        @can('mail-setting modules')
+                            <li><a href="{{ route('mail.setting') }}" key="t-alerts">Mail Setting</a></li>
                         @endcan
 
                         @can('app-credential module')
                              <li><a href="{{ route('app.credential') }}" key="t-alerts">App credential Manage</a></li>
-                       @endcan
+                        @endcan
 
                         @can('shipping management module')
                         <li><a href="{{ route('shipping.index') }}" key="t-buttons">Shipping Manage</a></li>

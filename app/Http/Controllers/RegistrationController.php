@@ -29,7 +29,15 @@ class RegistrationController extends Controller
             ], 422);
         }
 
-        return $authService->register($validated->validated());
+        // register user
+        $authService->register($validated->validated());
+
+        $response = [
+            'success' => true,
+            'message' => 'Registration successful',
+        ];
+
+        return response()->json($response, 201);
     }
 
     public function verifyEmail(AuthService $authService): JsonResponse

@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AliExpressController;
 use App\Http\Controllers\AppCredentialController;
-use App\Http\Controllers\AppManageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CjController;
 use App\Http\Controllers\DashboardController;
@@ -21,6 +21,8 @@ use App\Http\Controllers\Website\OrderController;
 use App\Http\Controllers\Website\UserController as ClientController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\AppInfoController;
+use App\Http\Controllers\MailSettingController;
 
 // middleware
 use App\Http\Middleware\AdminAuthenticatedMiddleware;
@@ -105,13 +107,17 @@ Route::middleware(['auth', config('jetstream.auth_session'), 'verified'])->group
             ->name('app.credential')
             ->middleware(['permission:permission module']);
 
-        Route::get('/app-manage', [AppManageController::class, 'index'])
-            ->name('app.manage')
+        // app info
+        Route::get('/app-info', [AppInfoController::class, 'index'])
+            ->name('app.info')
             ->middleware(['permission:permission module']);
 
-        Route::post('/app-manage', [AppManageController::class, 'store'])
-            ->name('app.manag')
+        Route::match(['post', 'put'], '/app-info', [AppInfoController::class, 'store'])
             ->middleware(['permission:permission module']);
+
+        // email credential
+        Route::get('/mail-setting', [MailSettingController::class, 'index'])->name('mail.setting');
+        Route::post('/mail-setting', [MailSettingController::class, 'store']);
 
         // role, permission and user
         Route::resource('permissions', PermissionController::class)
@@ -135,6 +141,10 @@ Route::middleware(['auth', config('jetstream.auth_session'), 'verified'])->group
     Route::post('/products-search', [ProductController::class, 'search'])->name('products.search');
 
 });
+
+// payment route
+Route::post('/payment-success', [PaymentController::class, 'payment'])->name('payment.callback');
+Route::get('/payment-cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 
 // application cache clear
 Route::get('/app-cache-clear', function () {
