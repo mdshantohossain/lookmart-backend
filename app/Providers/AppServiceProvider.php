@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use App\Models\Admin\Product;
-use App\Models\AppInfo;
-use App\Models\AppManage;
 use App\Models\Review;
 use App\Observers\ProductObserver;
 use App\Observers\ReviewObserver;
@@ -12,8 +10,6 @@ use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,8 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $loader = AliasLoader::getInstance();
-        $loader->alias('Debugbar', Debugbar::class);
+        if ($this->app->environment('local')) {
+            $loader = AliasLoader::getInstance();
+            $loader->alias('Debugbar', Debugbar::class);
+        }
     }
 
     /**
