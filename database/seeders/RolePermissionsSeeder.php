@@ -79,6 +79,10 @@ class RolePermissionsSeeder extends Seeder
             'mail-setting module',
             'mail-setting store',
 
+            'payment gateway management',
+
+            'cj token management',
+
             'shipping management module',
 
             'app cache clear',

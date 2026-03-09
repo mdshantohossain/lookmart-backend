@@ -133,18 +133,23 @@ Route::middleware(['auth', config('jetstream.auth_session'), 'verified'])->group
             ->middleware(['permission:user create|user edit|user destroy']);
     });
 
+    // cj token crud
+    Route::get('/cj-token', [CjController::class, 'create'])->name('cj.token');
+    Route::match(['post', 'put'], '/app-info', [CjController::class, 'store'])->name('cj.token.store');
+
+    // payment gateway api
+    Route::get('/payment-gateway/setting', [PaymentController::class, 'create'])->name('payment.setting');
+    Route::match(['post', 'put'], '/payment-gateway/setting', [PaymentController::class, 'store'])->name('payment.setting.store');
+
     // AJAX REQUEST
     // cj search product
-    Route::post('/cj-search-product',[CjController::class, 'index'])->name('cj.product.search');
+    Route::post('/cj-search-product', [CjController::class, 'index'])->name('cj.product.search');
     // get sub category via category id
     Route::get('/get-sub-categories/{categoryId}', [SubCategoryController::class,  'getSubCategories']);
-    Route::post('/products-search', [ProductController::class, 'search'])->name('products.search');
-
 });
 
 // payment route
 Route::post('/payment-success', [PaymentController::class, 'payment'])->name('payment.callback');
-Route::get('/payment-cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 
 // application cache clear
 Route::get('/app-cache-clear', function () {

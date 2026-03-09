@@ -7,9 +7,11 @@ use App\Models\OtherImage;
 use App\Models\ProductPolicy;
 use App\Models\ProductVariant;
 use App\Models\Review;
+use App\Models\Slider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Product extends Model
 {
@@ -59,5 +61,10 @@ class Product extends Model
         }
 
         return ProductPolicy::whereIn('id', $ids ?? [])->select(['id', 'title', 'image']);
+    }
+
+    public function sliders(): MorphMany
+    {
+        return $this->morphMany(Slider::class, 'sliderable');
     }
 }

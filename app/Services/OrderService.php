@@ -32,7 +32,7 @@ class OrderService
             $orderTotal = 0; // initiate value
 
             // fetch all ordered product
-            $products = Product::whereIn('id', $productIts)->get(['id', 'selling_price', 'discount', 'quantity'])->keyBy('id');
+            $products = Product::whereIn('id', $productIts)->get(['id', 'original_price', 'selling_price', 'discount', 'quantity'])->keyBy('id');
 
             foreach ($data['products'] as $item) {
                 $product = $products[$item['product_id']];
@@ -48,16 +48,17 @@ class OrderService
                 $orderTotal += $finalPrice * $item['quantity'];
             }
 
-            // calculate shipping charge
+            // shipping charge
             $shipping = ShippingCharge::select('is_free', 'charge')->find($data['delivery_method']);
+            $shippingCharge = $shipping->is_free ? 0 : $shipping->charge;
 
             $order = Order::create([
                 'user_id' => $userId,
-                'order_total' => $orderTotal,
+                'order_total' => $orderTotal + $shippingCharge,
                 'order_timestamp' => now()->timestamp,
                 'delivery_address' => $data['delivery_address'],
                 'phone' => $data['phone'],
-                'delivery_charge' => $shipping->is_free ? 0 : $shipping->charge,
+                'delivery_charge' => $shippingCharge,
                 'payment_method' => $data['payment_method'],
                 'slug' => Str::random(44),
                 'order_status' => 0,

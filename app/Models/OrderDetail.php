@@ -6,6 +6,8 @@ use App\Models\Admin\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class OrderDetail extends Model
 {
@@ -14,5 +16,10 @@ class OrderDetail extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function variant(): HasOne
+    {
+        return $this->hasOne(ProductVariant::class, 'id', 'variant_id');
     }
 }

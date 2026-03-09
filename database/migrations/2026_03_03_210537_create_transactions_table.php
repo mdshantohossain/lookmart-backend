@@ -21,9 +21,10 @@ return new class extends Migration
             $table->decimal('fee');
             $table->decimal('charged_amount');
             $table->string('invoice_id');
-            $table->string('payment_method');
             $table->string('sender_number');
             $table->string('transaction_id');
+            $table->timestamp('paid_at');
+            $table->string('bank_type');
             $table->string('status')->comment('0: PENDING; 1: COMPLETED');
             $table->timestamps();
         });

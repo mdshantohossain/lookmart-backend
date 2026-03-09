@@ -214,7 +214,7 @@ class AuthService
             if (! $record) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid or expired token. Please check to login or register again.',
+                    'message' => 'Invalid or expired token. Please register again.',
                 ], 400);
             }
 

@@ -24,12 +24,6 @@ return new class extends Migration
             $table->text('delivery_date')->nullable();
             $table->unsignedBigInteger('delivery_timestamp')->nullable();
             $table->tinyInteger('payment_method')->comment('0: Cash On Delivery, 1: Online');
-            $table->tinyInteger('payment_status')->default(0)->nullable()->comment('0: Pending, 1: Success, 2: Canceled, 3: Failed');
-            $table->unsignedBigInteger('payment_timestamp')->nullable();
-            $table->date('payment_date')->nullable();
-            $table->string('card_type')->nullable();
-            $table->text('transaction_id')->nullable()->unique();
-            $table->string('currency')->nullable();
             $table->string('slug')->unique();
             $table->timestamps();
         });

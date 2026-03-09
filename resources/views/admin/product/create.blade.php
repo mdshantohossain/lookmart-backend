@@ -680,7 +680,6 @@
                     data: { query },
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                     success: function (res) {
-                        console.log(res);
                         if (res.code !== 200 || !res.data) {
                             return showStatus('No product found in CJ', 'text-danger');
                         }

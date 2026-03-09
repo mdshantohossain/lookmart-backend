@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Shipping Management</h4>
-                    <a href="{{ route('shipping.create') }}" class="btn btn-primary waves-effect waves-light">
+                    <a href="{{ route('shipping.create') }}" class="btn btn-sm btn-primary waves-effect waves-light">
                         Add Shipping
                     </a>
                 </div>

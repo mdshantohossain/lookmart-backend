@@ -28,6 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-review', [ReviewController::class, 'addReview']);
     // logout
     Route::post('/auth/logout',  [LoginController::class, 'logout']);
+
+    // check valid order
+    Route::get('/verify-order/{slug}', [OrderController::class, 'verifyOrder']);
 });
 
 Route::get('/brands', [BrandController::class, 'getBrands']);

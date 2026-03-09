@@ -12,7 +12,7 @@
                         <thead class="table-light">
                         <tr>
                             <th>Sl</th>
-                            <th>User</th>
+                            <th>Customer</th>
                             <th>Order Total</th>
                             <th>Order Date</th>
                             <th>Payment Method</th>
@@ -26,35 +26,24 @@
                         @foreach($orders as $order)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ substr($order->user->name, 0, 16) }} <br> {{ $order->user->phone }}</td>
+                                <td>{{ substr($order->user->name, 0, 18) }} <br>
+                                    {{ $order->user->email }} <br>
+                                    {{ $order->user->phone }}
+                                </td>
                                 <td>৳{{ $order->order_total }}</td>
                                 <td>{{ $order->created_at->format('M m, Y') }}</td>
                                 <td>
                                     {{ $order->payment_method == 0 ? 'Cash On Delivery' : 'Online' }}
                                 </td>
                                 <td>
-                                <span class="badge badge-pill badge-soft-{{
-                                  $order->payment_status == 0 ? 'warning' :
-                                 ($order->payment_status == 1 ? 'success' :
-                               ($order->payment_status == 2 ? 'secondary' :
-                               ($order->payment_status == 3 ? 'danger' : '')))
-                                }}">
-                                    {{ $order->payment_status == 0 ? 'Pending': ($order->payment_status == 1 ? 'Success' : ($order->payment_status == 2 ? 'Canceled' : ($order->payment_status == 3 ? 'Failed' : ''))) }}
-                                </span>
+                                    @if($order->payment)
+                                    {!! getStatus($order->payment?->status, 'payment') !!}
+                                    @else
+                                        N/A
+                                    @endif
                                 </td>
                                 <td>
-                                     <span class="badge badge-pill badge-soft-{{
-                                     $order->order_status == 0 ? 'warning' :
-                                     ($order->order_status == 1 ? 'secondary' :
-                                     ($order->order_status == 2 ? 'success' :
-                                     ($order->order_status == 3 ? 'danger' : '')))
-                                }}">
-                                   {{ $order->order_status == 0 ? 'Pending':
-                                     ($order->order_status == 1 ? 'Processing' :
-                                     ($order->order_status == 2 ? 'Delivered' :
-                                     ($order->order_status == 3 ? 'Canceled' : '')))
-                                   }}
-                                </span>
+                                    {!! getStatus($order->order_status, 'order') !!}
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
@@ -66,9 +55,9 @@
                                             <i class="fa fa-book-open"></i>
                                         </a>
 
-                                        <a href="{{ route('download.invoice', $order->slug) }}" class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" title="Invoice download">
-                                            <i class="fa fa-download"></i>
-                                        </a>
+{{--                                        <a href="{{ route('download.invoice', $order->slug) }}" class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" title="Invoice download">--}}
+{{--                                            <i class="fa fa-download"></i>--}}
+{{--                                        </a>--}}
 
 {{--                                        <button href="" class="btn btn-outline-danger btn-sm" onclick="deleteOrder('orderDeleteForm{{$order->id}}')">--}}
 {{--                                            <i class="fa fa-trash"></i>--}}

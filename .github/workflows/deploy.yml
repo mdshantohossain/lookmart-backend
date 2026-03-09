@@ -66,11 +66,10 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/lookmart/admin.lookmartbd.com
-            php artisan migrate --force
             php artisan down
             php artisan migrate --force
             php artisan optimize:clear

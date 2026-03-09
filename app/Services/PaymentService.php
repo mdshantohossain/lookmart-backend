@@ -19,13 +19,12 @@ class PaymentService
             'amount' => number_format($order->order_total, 2, '.', ''),
             'metadata' => (object)[
                 'order_id' => $order->id,
-                 'user_id' => $order->user->id
+                'order_slug' => $order->slug,
+                'user_id' => $order->user->id
             ],
             'redirect_url' => route('payment.callback'),
-            'cancel_url' => route('payment.cancel'),
+            'cancel_url' => config('services.frontend.url') . '/payment-cancel',
         ]);
-
-        logger()->info('Response: ' . $response->body());
 
         return $response->json()['payment_url'] ?? null;
     }

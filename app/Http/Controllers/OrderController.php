@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin\Product;
+use App\Models\Order;
 use App\Models\ShippingCharge;
 use App\Models\User;
 use App\Services\AuthService;
@@ -75,21 +76,52 @@ class OrderController extends Controller
             }
         } else {
             $userId = $data['user_id'];
+            $user = User::find($userId);
+            if(!$user->phone) {
+                $user->update(['phone' => $data['phone']]);
+            }
         }
 
+        // create initiate order
        $order = $orderService->createOrder($userId, $data);
 
-        $paymentUrl = $paymentService->initiatePayment($order['order']);
+       // generate payment url
+       $paymentUrl = $paymentService->initiatePayment($order['order']);
 
         // final response
         $response = [
             'success' => true,
+            'message' => 'Order placed successfully',
             'data' => [
-                'authResponse' => $authResponse,
+                'auth_response' => $authResponse,
                 'payment_url' => $paymentUrl,
             ],
         ];
 
         return response()->json($response, 201);
+    }
+
+    public function verifyOrder(string $slug)
+    {
+        $order = Order::with('payment')->where('slug', $slug)->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid order.'
+            ]);
+        }
+
+        if($order->payment && $order->payment?->status == '1') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Your order has been placed successfully. We’ve received your payment and your order is now being processed. You can track your order status from your dashboard.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Your order has been placed successfully. But payment is still pending. You can retry the payment from your dashboard to complete your order."
+        ]);
     }
 }
