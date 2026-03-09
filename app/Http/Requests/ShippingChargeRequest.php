@@ -24,6 +24,7 @@ class ShippingChargeRequest extends FormRequest
         return [
             'city_name' =>  'required',
             'charge' =>  'required|numeric',
+            'is_free' =>  'required|in:0,1',
             'description' =>  'nullable|string',
             'status' =>  'required',
         ];

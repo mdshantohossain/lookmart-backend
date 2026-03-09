@@ -34,8 +34,8 @@
                         <div class="mb-3">
                             <label for="formrow-firstname-input" class="form-label">Free Shipping?</label>
                             <select name="is_free" class="form-select">
-                                <option value="0">No – Charge Delivery</option>
-                                <option value="1">Yes – Free Delivery</option>
+                                <option value="0" {{ old('is_free') == 0 ? 'selected' : '' }}>No – Charge Delivery</option>
+                                <option value="1" {{ old('is_free') == 1 ? 'selected' : '' }}>Yes – Free Delivery</option>
                             </select>
                             @error('is_free')
                             <div class="text-danger">{{ $message }}</div>
@@ -43,7 +43,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="formrow-firstname-input" class="form-label">Description</label>
+                            <label for="formrow-firstname-input" class="form-label">Note</label>
                            <textarea name="description" id="summernote" class="form-control" rows="5"></textarea>
                             @error('description')
                             <div class="text-danger">{{ $message }}</div>
@@ -77,13 +77,3 @@
         <!-- end col -->
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        // $(document).ready(function() {
-        //     $('#summernote').summernote({
-        //         placeholder: '* Some point about shipping <br /> * Hello World',
-        //     });
-        // });
-    </script>
-@endpush

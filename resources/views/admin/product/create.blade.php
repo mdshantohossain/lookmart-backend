@@ -51,24 +51,25 @@
             <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
                 @csrf
 
+               {{-- hidden input values --}}
+                <input type="hidden" id="cj_id" name="cj_id" value="{{ old('cj_id') }}" />
+                <input type="hidden" id="buy_price" name="buy_price" value="{{ old('buy_price') }}" />
+                <input type="hidden" name="variants_json" id="variants_json" />
+
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Basic Information</h4>
                         <p class="card-title-desc">Fill all information below</p>
-
-                        {{-- Hidden values --}}
-                        <input type="hidden" id="cj_id" name="cj_id" value="{{ old('cj_id') }}" />
-                        <input type="hidden" id="buy_price" name="buy_price" value="{{ old('buy_price') }}" />
 
                         <div class="row g-3">
 
                             <!-- Category -->
                             <div class="col-md-6">
                                 <label for="categoryId" class="form-label">
-                                    Category <span class="text-danger">*</span>
+                                    Category<span class="text-danger">*</span>
                                 </label>
                                 <select name="category_id" class="form-select" id="category">
-                                    <option value="">Select</option>
+                                    <option value="">Choose category</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ $category->id == old('category_id') ? 'selected' : '' }}>
                                             {{ $category->name }}
@@ -84,7 +85,7 @@
                             <div class="col-md-6">
                                 <label for="subCategoryId" class="form-label">Sub category</label>
                                 <select name="sub_category_id" id="subCategoryId" class="form-select">
-                                    <option value="">Select</option>
+                                    <option value="">Choose sub category</option>
                                     @foreach($subCategories as $subCategory)
                                         <option value="{{ $subCategory->id }}" {{ $subCategory->id == old('sub_category_id') ? 'selected' : '' }}>
                                             {{ $subCategory->name }}
@@ -99,7 +100,7 @@
                             <!-- Product Name -->
                             <div class="col-md-12">
                                 <label for="name" class="form-label">
-                                    Product Name <span class="text-danger">*</span>
+                                    Product Name<span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="name" name="name"
                                        value="{{ old('name') }}" placeholder="Enter product name">
@@ -111,7 +112,7 @@
                             <!-- Pricing -->
                             <div class="col-md-4">
                                 <label for="original_price" class="form-label">Original Price</label>
-                                <input type="number" step="0.01" class="form-control" id="original_price"
+                                <input type="text" step="0.01" class="form-control" id="original_price"
                                        name="original_price" value="{{ old('original_price') }}" placeholder="0.00">
                                 @error('original_price')
                                 <span id="original_price_error_message" class="text-danger">{{ $message }}</span>
@@ -130,9 +131,9 @@
 
                             <div class="col-md-4">
                                 <label for="selling_price" class="form-label">
-                                    Selling Price <span class="text-danger">*</span>
+                                    Selling Price<span class="text-danger">*</span>
                                 </label>
-                                <input type="number" step="0.01" class="form-control" id="selling_price"
+                                <input type="text" step="0.01" class="form-control" id="selling_price"
                                        name="selling_price" value="{{ old('selling_price') }}" placeholder="0.00">
                                 @error('selling_price')
                                 <span id="selling_price_error_message" class="text-danger">{{ $message }}</span>
@@ -145,7 +146,7 @@
                             <!-- SKU -->
                             <div class="col-md-6">
                                 <label for="sku" class="form-label">
-                                    SKU <span class="text-danger">*</span>
+                                    SKU<span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="sku" name="sku"
                                        value="{{ old('sku') }}" placeholder="Enter product unique SKU">
@@ -167,7 +168,7 @@
                             <!-- Image Thumbnail -->
                             <div class="col-md-3">
                                 <label for="image_thumbnail" class="form-label">
-                                    Image Thumbnail <span class="text-danger">*</span>
+                                    Image Thumbnail<span class="text-danger">*</span>
                                 </label>
                                 <input type="file" class="form-control" id="image_thumbnail" name="image_thumbnail"
                                        accept="image/*" />
@@ -247,21 +248,30 @@
 
                             <div class="col-md-4">
                                 <label for="total_day_to_delivery" class="form-label">Total day for delivery</label>
-                                <input type="text" class="form-control" id="total_day_to_delivery"
+                                <input type="number" class="form-control" id="total_day_to_delivery"
                                        name="total_day_to_delivery" value="{{ old('total_day_to_delivery') }}"
-                                       placeholder="Total delivery day">
+                                       placeholder="Total delivery day" />
                             </div>
 
                             <!-- Variants Section -->
                             <div class="col-md-12 mt-4" id="variantSection">
+
                                 <h5 class="fw-bold mb-3">Product Variants</h5>
+
+                                @error('variants')
+                                    <div id="variants_error_message">
+                                        <div class="alert alert-danger mb-2">
+                                            {{ $message }}
+                                        </div>
+                                    </div>
+                                @enderror
 
                                 <div class="table-responsive">
                                     <table class="table table-bordered align-middle">
                                         <thead class="table-light">
                                         <tr>
-                                            <th>Image</th>
-                                            <th>Variant Key</th>
+                                            <th>Image<span class="text-danger">*</span></th>
+                                            <th>Variant Key<span class="text-danger">*</span></th>
                                             <th>Buy Price</th>
                                             <th>Suggested Price</th>
                                             <th>Selling Price</th>
@@ -269,25 +279,62 @@
                                         </tr>
                                         </thead>
                                         <tbody id="variantTableBody">
-                                        @if(old('variants'))
-                                          @foreach(old('variants') as  $key => $variant)
+                                        @if(old('variants_json'))
+                                            @php($variants = json_decode(old('variants_json'), true))
+
+                                          @foreach($variants as $key => $variant)
+
                                               <tr class="variant-item">
                                                   <td>
-                                                      <input type="file" name="variants[{{ $key }}][image]" accept="image/*" class="form-control form-control-sm variant-image-input mb-1" />
+                                                      @if(!empty($variant['sku']))
+                                                          <input type="hidden"  class="sku" value="{{ $variant['sku'] }}" />
+                                                      @endif
 
-                                                      <div class="variant-preview position-relative mt-1" style="width:60px;">
-                                                          <img src="{{ $variant['image'] }}" class="img-thumbnail" width="60" height="60" style="object-fit:cover;border-radius:6px;" alt="${v.variantKey}" />
-                                                          <i class="fa fa-times-circle text-danger remove-variant-image"
-                                                             style="cursor:pointer; position:absolute; top:-2px; right:-2px;">
-                                                          </i>
-                                                          <input type="hidden" name="variants[{{ $key }}][image]" value="{{ $variant['image'] }}">
-                                                      </div>
+                                                      <input type="file" accept="image/*" name="variant_images[]" class="form-control form-control-sm variant-image-input mb-1" />
+
+                                                      @error('variants.'.$key.'.image')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                      @enderror
+
+                                                      @if(!empty($variant['image']))
+                                                          <div class="variant-preview position-relative mt-1" style="width:60px;">
+                                                              <img src="{{ $variant['image'] }}" class="img-thumbnail" alt="variant image" width="60" height="60" style="object-fit:cover;border-radius:6px;" />
+                                                              <i class="fa fa-times-circle text-danger remove-variant-image"
+                                                                 style="cursor:pointer; position:absolute; top:-2px; right:-2px;">
+                                                              </i>
+                                                              <input type="hidden" class="variant-image-hidden" value="{{ $variant['image'] }}">
+                                                          </div>
+                                                      @endif
 
                                                   </td>
-                                                  <td><input type="text" name="variants[{{ $key }}][variant_key]" value="{{ $variant['variant_key'] }}" class="form-control form-control-sm" placeholder="Color - Size" /></td>
-                                                  <td><input type="number" step="0.01" name="variants[{{ $key }}][buy_price]" value="{{ $variant['buy_price'] }}" class="form-control form-control-sm" placeholder="0.00" /></td>
-                                                  <td><input type="number" step="0.01" name="variants[{{ $key }}][suggested_price]" value="{{ $variant['suggested_price'] }}" class="form-control form-control-sm" placeholder="0.00" readonly /></td>
-                                                  <td><input type="number" step="0.01" name="variants[{{ $key }}][selling_price]" value="{{ $variant['selling_price'] }}" class="form-control form-control-sm" placeholder="0.00" /></td>
+                                                  <td>
+                                                      <input type="text" value="{{ $variant['variant_key'] }}" class="form-control form-control-sm variant-key" placeholder="Color - Size" />
+                                                      @error('variants.'.$key.'.variant_key')
+                                                         <small class="text-danger">{{ $message }}</small>
+                                                      @enderror
+                                                  </td>
+                                                  <td>
+                                                      <input type="number" step="0.01" value="{{ $variant['buy_price'] }}" class="form-control form-control-sm buy-price" placeholder="0.00" />
+                                                      @error('variants.'.$key.'.buy_price')
+                                                         <small class="text-danger">{{ $message }}</small>
+                                                      @enderror
+                                                  </td>
+                                                  <td>
+                                                      @if(!empty($variant['suggested_price']))
+                                                          <input type="number" step="0.01" value="{{ $variant['suggested_price'] }}" class="form-control form-control-sm suggested-price" placeholder="0.00" readonly />
+                                                          @error('variants.'.$key.'.suggested_price')
+                                                             <small class="text-danger">{{ $message }}</small>
+                                                          @enderror
+                                                      @else
+                                                          N/A
+                                                      @endif
+                                                  </td>
+                                                  <td>
+                                                      <input type="number" step="0.01" value="{{ $variant['selling_price'] }}" class="form-control form-control-sm selling-price" placeholder="0.00" />
+                                                      @error('variants.'.$key.'.selling_price')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                      @enderror
+                                                  </td>
                                                   <td><button type="button" class="btn btn-danger btn-sm remove-variant"><i class="fa fa-trash"></i></button></td>
                                               </tr>
                                           @endforeach
@@ -304,7 +351,7 @@
                             <!-- Short Description -->
                             <div class="col-md-12">
                                 <label for="short_description" class="form-label">
-                                    Short Description <span class="text-danger">*</span>
+                                    Short Description<span class="text-danger">*</span>
                                 </label>
                                 <textarea class="form-control" id="short_description" name="short_description"
                                           rows="3" placeholder="Enter product's short description">{{ old('short_description') }}</textarea>
@@ -500,17 +547,18 @@
 
         // Handle Add Variant manually
         $(document).on('click', '#addVariantBtn', function () {
-            const rowCount = $('#variantTableBody tr').length;
             const newRow = `
                   <tr class="variant-item">
                     <td>
-                      <input type="file" name="variants[${rowCount + 1}][image]" accept="image/*" class="form-control form-control-sm variant-image-input mb-1" />
-
+                      <input type="file" accept="image/*" name="variant_images[]" class="form-control form-control-sm variant-image-input mb-1" />
                     </td>
-                    <td><input type="text" name="variants[${rowCount + 1}][variant_key]" class="form-control form-control-sm" placeholder="Color - Size" /></td>
-                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][buy_price]" class="form-control form-control-sm" placeholder="0.00" /></td>
-                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][suggested_price]" class="form-control form-control-sm" placeholder="0.00" readonly /></td>
-                    <td><input type="number" step="0.01" name="variants[${rowCount + 1}][selling_price]" class="form-control form-control-sm" placeholder="0.00" /></td>
+                    <td><input type="text" class="form-control form-control-sm variant-key" placeholder="Color - Size" /></td>
+                    <td><input type="number" step="0.01" class="form-control form-control-sm buy-price" placeholder="0.00" /></td>
+                    <td>
+                        <span>N/A</span>
+                    </td>
+                    <td>
+                    <input type="number" step="0.01" class="form-control form-control-sm selling-price" placeholder="0.00" /></td>
                     <td><button type="button" class="btn btn-danger btn-sm remove-variant"><i class="fa fa-trash"></i></button></td>
                   </tr>`;
             $('#variantTableBody').append(newRow);
@@ -520,15 +568,19 @@
         $(document).on('change', '.variant-image-input', function () {
             const file = this.files[0];
 
+            $(this).next('.variant-preview').remove();
+
             if (file) {
                 const reader = new FileReader();
-                reader.onload = e => {
+                reader.onload = (e) => {
+                    const dataURL = e.target.result;
                     $(this).after(`
                      <div class="variant-preview position-relative mt-1" style="width:60px;">
-                        <img src="${e.target.result}" class="img-thumbnail" width="60" height="60" style="object-fit:cover;border-radius:6px;" alt="variant image" />
+                        <img src="${dataURL}" class="img-thumbnail" width="60" height="60" style="object-fit:cover;border-radius:6px;" alt="variant image" />
                         <i class="fa fa-times-circle text-danger remove-variant-image"
                            style="cursor:pointer; position:absolute; top:-5px; right:-5px;">
                         </i>
+                    <input type="hidden" class="variant-image-hidden" value="${dataURL}" />
                     </div>`)
                 };
                 reader.readAsDataURL(file);
@@ -538,7 +590,8 @@
         // remove variant image
         $(document).on('click', '.remove-variant-image', function () {
             const wrapper = $(this).closest('.variant-preview');
-            wrapper.prev('.variant-image-input').val(''); // reset file input
+            wrapper.prevAll('.variant-image-input').val('');
+            wrapper.find('.variant-image-hidden').remove();
             wrapper.remove();
         });
 
@@ -559,6 +612,7 @@
             }
 
             const oldTags = "{{ old('tags') }}";
+
             if(oldTags) {
                 tags.setValues(oldTags);
             }
@@ -607,7 +661,7 @@
 
             // reset input error
             const resetInputErrors = () => {
-                $('#category_error_message, #variants_title_error_message, #sub_category_error_message, #name_error_message, #selling_price_error_message, #original_price_error_message, #quantity_error_message, #sku_error_message, #thumbnail_error_message, #other_image_error_message, #short_description_error_message, #long_description_error_message').empty();
+                $('#category_error_message, #variants_error_message, #variants_title_error_message, #sub_category_error_message, #name_error_message, #selling_price_error_message, #original_price_error_message, #quantity_error_message, #sku_error_message, #image_thumbnail_error_message, #video_thumbnail_error_message, #other_image_error_message, #short_description_error_message, #long_description_error_message').empty();
             }
 
             // CJ Product Search
@@ -626,7 +680,7 @@
                     data: { query },
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                     success: function (res) {
-                        console.log(res);                       if (res.code !== 200 || !res.data) {
+                        if (res.code !== 200 || !res.data) {
                             return showStatus('No product found in CJ', 'text-danger');
                         }
 
@@ -671,7 +725,6 @@
 
                         if (product.variants && product.variants.length > 0) {
                             $variantSection.show();
-                            const imageSet = new Set();
 
                             const variantMap = {}; // color → { image, sizes: {}, default: {...} }
                             product.variants.forEach((variant, index) => {
@@ -740,46 +793,45 @@
                             const renderRow = (v) => `
                                  <tr class="variant-item">
                                       <td>
-                                         <input type="file" name="variants[${v.vid}][image]" accept="image/*" class="form-control form-control-sm variant-image-input" />
+                                         <input type="file" accept="image/*" name="variant_images[]" class="form-control form-control-sm variant-image-input" />
 
                                           <div class="variant-preview position-relative mt-1" style="width:60px;">
                                              <img src="${v.image}" class="img-thumbnail" width="60" height="60" style="object-fit:cover;border-radius:6px;" alt="${v.variantKey}" />
                                                 <i class="fa fa-times-circle text-danger remove-variant-image"
                                                    style="cursor:pointer; position:absolute; top:-2px; right:-2px;">
                                                 </i>
-                                                <input type="hidden" name="variants[${v.vid}][image]" value="${v.image}">
+                                             <input type="hidden" class="variant-image-hidden" name="variant_images[]" value="${v.image}">
                                           </div>
 
                                       </td>
                                       <td>
-                                        <input type="text" name="variants[${v.vid}][variant_key]" class="form-control form-control-sm" value="${v.variantKey}" readonly />
-                                        <input type="hidden" name="variants[${v.vid}][sku]" value="${v.variantSku}"  />
+                                        <input type="text" class="form-control form-control-sm variant-key" value="${v.variantKey}" />
+                                        <input type="hidden" class="sku" value="${v.variantSku}"  />
                                       </td>
                                       <td>
-                                        <input type="number" step="0.01" name="variants[${v.vid}][buy_price]" class="form-control form-control-sm" value="${v.buy_price}" readonly />
+                                        <input type="number" step="0.01" class="form-control form-control-sm buy-price" value="${v.buy_price}" readonly />
                                       </td>
                                       <td>
-                                        <input type="number" step="0.01" name="variants[${v.vid}][suggested_price]" class="form-control form-control-sm" value="${v.suggestion_sell_price}" readonly />
+                                        <input type="number" step="0.01" class="form-control form-control-sm suggested-price" value="${v.suggestion_sell_price}" readonly />
                                       </td>
                                       <td>
-                                        <input type="number" step="0.01" name="variants[${v.vid}][selling_price]" class="form-control form-control-sm" placeholder="0.00" />
+                                        <input type="number" step="0.01" class="form-control form-control-sm selling-price" placeholder="0.00" />
                                       </td>
                                       <td>
                                         <button type="button" class="btn btn-danger btn-sm remove-variant">
-
-<i class="fa fa-trash"></i>
-</button>
+                                        <i class="fa fa-trash"></i>
+                                        </button>
                                       </td>
-                                    <td class="d-none">
-                                    <input type="hidden" name="variants[${v.vid}][vid]" value="${v.vid}" />
-                                    <input type="hidden" name="variants[${v.vid}][sku]" value="${v.variantSku}" />
-                                    </td>
+                                      <td class="d-none">
+                                        <input type="hidden" class="vid" value="${v.vid}" />
+                                      </td>
                                  </tr>`;
 
                             Object.entries(variantMap).forEach(([color, data]) => {
                                 Object.entries(data.sizes).forEach(([size, v]) => {
                                     rows += renderRow(v);
                                 });
+
                                 if (data.default) rows += renderRow(data.default);
                             });
 
@@ -844,7 +896,18 @@
             });
 
             //  Other Images Upload
+            const dataTransfer = new DataTransfer();
             $('#other_images').on('change', function () {
+
+                for(let file of this.files) {
+                    dataTransfer.items.add(file)
+                }
+
+                this.files = dataTransfer.files;
+
+                $('.other_image_preview').empty();
+
+                $('#other_image_error_message').text('');
                 previewFileInput(this, '.other_image_preview', 100, 100);
             });
 
@@ -898,16 +961,54 @@
                 clearError(this.id);
                 const categoryId = $(this).val();
                 const subCategorySelect = $('#subCategoryId');
-                if (!categoryId)
-                    return subCategorySelect.html('<option value="">Select</option>');
+                if (!categoryId) {
+                    return subCategorySelect.html('<option value="">Choose sub category</option>');
+                }
+
                 $.get(`/get-sub-categories/${categoryId}`, function (res) {
-                    subCategorySelect.html('<option value="">Select</option>');
+                    subCategorySelect.html('<option value="">Choose sub category</option>');
                     res.forEach(sc => subCategorySelect.append(`<option value="${sc.id}">${sc.name}</option>`));
                 });
             });
 
             // Summernote Init
             $('#long_description').summernote({ height: 200, placeholder: 'Enter product long description...' });
+        });
+
+        // added first row for variant
+        $(document).ready(function () {
+            if ($('#variantTableBody tr').length === 0) {
+                $('#addVariantBtn').trigger('click');
+            }
+        });
+
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+
+            const button = $('button[type="submit"]');
+
+            const variants = [];
+            $('.variant-item').each(function (index) {
+
+                variants.push({
+                    vid: $(this).find('.vid').val() ?? null,
+                    sku: $(this).find('.sku').val(),
+                    variant_key: $(this).find('.variant-key').val(),
+                    buy_price: $(this).find('.buy-price').val(),
+                    suggested_price: $(this).find('.suggested-price').val() ?? null,
+                    selling_price: $(this).find('.selling-price').val(),
+                    image: index
+                });
+            });
+
+            $('#variants_json').val(JSON.stringify(variants));
+
+            // finally submit the form
+            this.submit();
+
+            button.text('Product creating...');
+            button.attr('disabled', true);
+
         });
     </script>
 @endpush

@@ -29,9 +29,9 @@ class UserService
 
             DB::commit();
             return $user;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            report($e);
             DB::rollBack();
-            logger()->error($e->getMessage());
             return null;
         }
     }

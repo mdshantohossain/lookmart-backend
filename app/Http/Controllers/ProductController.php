@@ -14,14 +14,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\View\View;
+use Throwable;
 
 class ProductController extends Controller
 {
-    protected string $redisKey = 'products',
-        $exclusiveRedisKey = 'exclusive-products',
-        $trendingRedisKey = 'trending-products',
-        $redisField = 'all',
-        $redisSlugKey = "slugs";
+    protected string $redisKey = 'products', $exclusiveRedisKey = 'exclusive-products', $trendingRedisKey = 'trending-products', $redisSlugKey = "slugs";
 
     // get exclusive section product on frontend
     public function getExclusiveProducts(): JsonResponse
@@ -29,8 +26,7 @@ class ProductController extends Controller
         $cached = Redis::get($this->exclusiveRedisKey);
 
         if($cached){
-            $products = json_decode($cached);
-
+            return response()->json(json_decode($cached));
         } else {
             $products = Product::with('variants')
                 ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
@@ -42,21 +38,25 @@ class ProductController extends Controller
                 ->take(30)
                 ->get();
 
+            $response = [
+                'success' => true,
+                'data' => $products
+            ];
+
             // caching
-            Redis::set($this->exclusiveRedisKey, json_encode($products));
+            Redis::set($this->exclusiveRedisKey, json_encode($response));
         }
 
-        return response()->json($products);
+        return response()->json($response);
     }
 
     // get tending section product on frontend
     public function getTrendingProducts(): JsonResponse
     {
-        $cached = Redis::get($this->trendingRedisKey, $this->redisField);
+        $cached = Redis::get($this->trendingRedisKey);
 
         if($cached) {
-            $products = json_decode($cached);
-
+            return response()->json(json_decode($cached));
         } else {
             $products = Product::with('variants')
                 ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
@@ -69,10 +69,15 @@ class ProductController extends Controller
                 ->take(30)
                 ->get();
 
-
+             $response = [
+                'success' => true,
+                'data' => $products
+            ];
+            // caching
+            Redis::set($this->exclusiveRedisKey, json_encode($response));
         }
 
-        return response()->json($products);
+        return response()->json($response);
     }
 
     public function index()
@@ -105,9 +110,9 @@ class ProductController extends Controller
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
-    public function store(ProductCreateRequest $request, ProductService $productService)
+    public function store(ProductCreateRequest $request, ProductService $productService): RedirectResponse
     {
         // check permission of request user.
         isAuthorized('product create');
@@ -126,13 +131,13 @@ class ProductController extends Controller
         return redirect('/products')->with('success', 'Product created successfully');
     }
 
-    public function show(Product $product): View
+    public function show(Product $product)
     {
         // check permission of request user
         isAuthorized('product show');
 
         return view('admin.product.detail', [
-            'product' =>  $product->load('otherImages')
+            'product' =>  $product->load(['variants', 'otherImages'])
         ]);
     }
 
@@ -149,12 +154,15 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(ProductCreateRequest $request, Product $product, ProductService $productService): RedirectResponse
+    /**
+     * @throws Throwable
+     */
+    public function update(ProductCreateRequest $request, Product $product, ProductService $productService)
     {
         // check permission of current user
         isAuthorized('product edit');
 
-        $updatedProduct = $productService->updateOrCreate($request->all(), $product);
+        $updatedProduct = $productService->updateOrCreate($request->validated(), $product);
 
         if (!$updatedProduct) {
             return back()->with('error', 'Product could not be updated');
@@ -215,6 +223,7 @@ class ProductController extends Controller
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('status', 1)
+            ->latest()
             ->get();
 
         // redis caching
@@ -233,13 +242,13 @@ class ProductController extends Controller
 
         Redis::del($this->trendingRedisKey);
 
-        Redis::del("category_products:$product->category->slug");
+        Redis::del("category_products:{$product->category->slug}");
 
         if ($product->sub_category_id) {
-            Redis::del("subcategory_products:$product->subCategory->slug");
+            Redis::del("subcategory_products:{$product->subCategory->slug}");
         }
 
-        $cacheKey = "product_detail:$product->slug";
+        $cacheKey = "product_detail:{$product->slug}";
 
         if(Redis::exists($cacheKey)) {
             Redis::del($cacheKey);
@@ -255,15 +264,13 @@ class ProductController extends Controller
                     'message' => 'Slug is missing',
                 ], 419);        }
 
-            $cacheKey = "product_detail:$slug";
+            $cacheKey = "product_detail:{$slug}";
 
             if (Redis::exists($cacheKey)) {
                 return response()->json(json_decode(Redis::get($cacheKey)));
             }
 
-            $product = Product::with(['category', 'otherImages', 'reviews' => function ($query) {
-                $query->latest();
-            }, 'reviews.user', 'variants'])
+            $product = Product::with(['category', 'otherImages', 'reviews' => fn($query) => $query->latest(), 'reviews.user', 'variants'])
                 ->where('slug', $slug)
                 ->withCount('reviews')
                 ->withAvg('reviews', 'rating')
@@ -272,7 +279,7 @@ class ProductController extends Controller
             if (!$product) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid product slug',
+                    'message' => 'Product not found',
                 ]);
             }
 
@@ -281,14 +288,15 @@ class ProductController extends Controller
             // make response
             $response = [
                 'success' => true,
-                'data' => $product
+                'data' => $product->toArray()
             ];
 
             // cached
             Redis::set($cacheKey, json_encode($response));
 
             return response()->json($response);
-        } catch (\Throwable $th) {
+
+        } catch (Throwable $th) {
           report($th);
           return response()->json([
               'success' => false,
@@ -497,7 +505,7 @@ class ProductController extends Controller
 
             return response()->json($response);
 
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             return response()->json([
                 'success' => false,
                 'message' => $exception->getMessage(),

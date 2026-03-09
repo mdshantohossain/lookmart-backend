@@ -56,5 +56,9 @@ return [
     ],
     'cj' => [
         'cj_access_token' => env('CJ_ACCESS_TOKEN'),
+    ],
+    'payment' => [
+        'url' => env('UDDOKTAPAY_URL'),
+        'api_key' => env('UDDOKTAPAY_API_KEY'),
     ]
 ];

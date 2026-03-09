@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Admin\Product;
+use App\Models\AppInfo;
 use App\Models\AppManage;
 use App\Models\Review;
 use App\Observers\ProductObserver;
@@ -31,7 +32,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
         Product::observe(ProductObserver::class);
         Review::observe(ReviewObserver::class);
 
@@ -50,22 +50,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super-admin') ? true : null;
-        });
-
-        View::composer('*', function ($view) {
-            $cached = Redis::hget('app', 'app');
-
-            if($cached) {
-                $app = json_decode($cached, true);
-            } else {
-                $app = AppManage::first();
-
-                Redis::hset('app', 'app', json_encode($app));
-            }
-
-            $view->with([
-                'app' => $app,
-            ]);
         });
     }
 }

@@ -33,16 +33,11 @@ class ProductCacheJob implements ShouldQueue
 
     protected function rebuildProductCache(): void
     {
-        $cacheKey = "product_detail:$this->slug";
+        $cacheKey = "product_detail:{$this->slug}";
 
         Redis::del($cacheKey);
 
-        $product = Product::with([
-            'category',
-            'otherImages',
-            'variants',
-            'reviews.user',
-        ])
+        $product = Product::with(['category', 'otherImages', 'reviews' => fn ($query) => $query->latest(), 'reviews.user', 'variants'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('slug', $this->slug)
@@ -52,22 +47,28 @@ class ProductCacheJob implements ShouldQueue
             return;
         }
 
-        Redis::set($cacheKey, json_encode([
+        $product->policies = $product->policies()->get();
+
+        $response = [
             'success' => true,
             'data' => $product,
-        ]));
+        ];
+
+        logger()->info($response);
+
+        Redis::set($cacheKey, json_encode($response));
     }
 
     // product's related product
     protected function rebuildRelatedProductsCache(): void
     {
-        $cacheKey = "related_products:$this->slug";
+        $cacheKey = "related_products:{$this->slug}";
 
         Redis::del($cacheKey);
 
         // Fetch related products by product category
         $relatedProducts = Product::with('variants')
-            ->select(['id', 'name', 'slug', 'image_thumbnail', 'sku',
+            ->select(['id', 'category_id', 'name', 'slug', 'image_thumbnail', 'sku',
                 'video_thumbnail', 'selling_price', 'original_price', 'discount',
                 'total_day_to_delivery', 'total_sold', 'is_free_delivery']) // add more field if needed
             ->where('category_id', $this->categoryId)

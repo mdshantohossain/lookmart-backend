@@ -40,7 +40,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::bind('review', function (int $id) {
-            return Product::select(['id', 'name', 'thumbnail', 'sku'])->where('id', $id)->firstOrFail();
+            return Product::select(['id', 'name', 'image_thumbnail', 'sku'])->where('id', $id)->firstOrFail();
         });
 
         Route::bind('order', function (string $slug) {

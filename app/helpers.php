@@ -49,6 +49,10 @@ if (!function_exists('getStatus')) {
                 3 => ['label' => 'Canceled', 'class' => 'badge-soft-danger'],
                 4 => ['label' => 'Returned', 'class' => 'badge-soft-secondary'],
             ],
+            'payment' => [
+                0 => ['label' => 'Pending', 'class' => 'badge-soft-warning'],
+                1 => ['label' => 'Completed', 'class' => 'badge-soft-success']
+            ],
         ];
 
         $data = $statuses[$type][$status] ?? ['label' => 'Unknown', 'class' => 'badge-soft-dark'];

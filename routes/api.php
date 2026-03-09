@@ -2,19 +2,19 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\WishlistController;
-use Illuminate\Http\Request;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RegistrationController;
-use App\Http\Controllers\AppManageController;
+use App\Http\Controllers\AppInfoController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\SocialLoginController;
 use App\Http\Controllers\OrderController;
 use \App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ShippingChargeController;
 
 Route::middleware('auth:sanctum')->group(function () {
     // user
@@ -28,6 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-review', [ReviewController::class, 'addReview']);
     // logout
     Route::post('/auth/logout',  [LoginController::class, 'logout']);
+
+    // check valid order
+    Route::get('/verify-order/{slug}', [OrderController::class, 'verifyOrder']);
 });
 
 Route::get('/brands', [BrandController::class, 'getBrands']);
@@ -56,16 +59,19 @@ Route::post('/auth/social-login',  [SocialLoginController::class, 'socialLogin']
 Route::get('/auth/forgot-password',  [ForgotPasswordController::class, 'index']);
 Route::post('/auth/reset-password',  [ForgotPasswordController::class, 'store']);
 
-// refresh access_token
+// refresh access token
 Route::post('/auth/refresh-token', [LoginController::class, 'refreshToken']);
 
 // place order
 Route::post('/place-order', [OrderController::class, 'placeOrder']);
-Route::post('/signin/or/signup', [LoginController::class, 'signinOrSignup']);
+//Route::post('/signin/or/signup', [LoginController::class, 'signinOrSignup']);
 
 // wishlist
 Route::post('/wishlist-add', [WishlistController::class, 'store']);
 
-Route::get('/app-info', [AppManageController::class, 'getAppInfo']);
+// shipping charge
+Route::get('/shipping-charge', [ShippingChargeController::class, 'getActiveShipping']);
+
+Route::get('/app-info', [AppInfoController::class, 'getAppInfo']);
 Route::get('/product-details/{slug}', [ProductController::class, 'getProductDetail']);
 Route::get('/related-products/{slug}', [ProductController::class, 'getRelatedProducts']);

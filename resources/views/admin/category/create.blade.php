@@ -24,7 +24,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="formrow-firstname-input" class="form-label">Image</label>
+                            <label for="formrow-firstname-input" class="form-label">Image<span class="text-danger">*</span></label>
                             <input type="file" class="form-control image" name="image" />
                             @error('image')
                             <div class="text-danger">{{ $message }}</div>

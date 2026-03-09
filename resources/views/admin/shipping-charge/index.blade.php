@@ -7,8 +7,8 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">All Shipping Management</h4>
-                    <a href="{{ route('shipping.create') }}" class="btn btn-primary waves-effect waves-light">
+                    <h4 class="card-title">Shipping Management</h4>
+                    <a href="{{ route('shipping.create') }}" class="btn btn-sm btn-primary waves-effect waves-light">
                         Add Shipping
                     </a>
                 </div>
@@ -21,6 +21,7 @@
                                 <th class="align-middle">Name</th>
                                 <th class="align-middle">Charge</th>
                                 <th class="align-middle">Free</th>
+                                <th class="align-middle">Status</th>
                                 <th class="align-middle">Action</th>
                             </tr>
                             </thead>
@@ -46,6 +47,9 @@
                                         </td>
 
                                         <td>
+                                            {!! getStatus($shippingCharge->status) !!}                                        </td>
+
+                                        <td>
                                             <div>
                                                 <a href="{{ route('shipping.edit', $shippingCharge->id) }}" class="btn btn-sm btn-primary" >
                                                     <i class="fa fa-edit"></i>
@@ -65,7 +69,7 @@
                             @else
                                 <tr>
                                     <td colspan="9">
-                                        <p class="text-center fs-5 mt-4">Nowhere shipping cost created yet</p>
+                                        <p class="text-center fs-5 mt-4">Nowhere shipping cost added yet</p>
                                     </td>
                                 </tr>
                             @endif

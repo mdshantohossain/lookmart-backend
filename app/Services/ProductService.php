@@ -36,7 +36,7 @@ class ProductService
             }
 
             // remove previous video thumbnail from store
-            if($product && $data['remove_previous_video_thumbnail'] == 1) {
+            if($product && $data['remove_video_thumbnail'] == 1) {
                 if($product->video_thumbnail) {
                     removeImage($product->video_thumbnail);
                 }
@@ -55,9 +55,8 @@ class ProductService
 
             DB::beginTransaction();
 
+            // product
             $inputs = [
-                'cj_id' => $data['cj_id'],
-                'buy_price' => $data['buy_price'],
                 'category_id' => $data['category_id'],
                 'sub_category_id' => $data['sub_category_id'],
                 'name' => $data['name'],
@@ -86,19 +85,33 @@ class ProductService
                 'slug' => $product ? $product->slug : generateUniqueSlug($data['name'])
             ];
 
+            if(!empty($data['cj_id'])) {
+                $inputs['cj_id'] = $data['cj_id'];
+            }
+
+            if(!empty($data['buy_price'])) {
+                $inputs['buy_price'] = $data['buy_price'];
+            }
+
             // Create product
             $storedProduct = $product ? tap($product)->update($inputs) : Product::create($inputs);
 
-            // remove selected other image to remove
-            if(!empty($data['remove_other_image'])) {
-                $deleteIds = array_keys(array_filter($data['remove_other_image'], fn($v) => $v == 1));
+            // remove other images
+            $removeImages = json_decode($data['remove_other_images'] ?? '[]', true);
 
-                if ($deleteIds) {
-                    OtherImage::whereIn('id', $deleteIds)->delete();
-                }
+            if(!empty($removeImages)) {
+                OtherImage::whereIn('id', $removeImages)->each(function ($otherImage) {
+
+                    if($otherImage->image) {
+                        removeImage($otherImage->image);
+                    }
+
+                    // delete entier other image row
+                    $otherImage->delete();
+                });
             }
 
-            // Handle other image
+            // Handle other image to save
             $otherImages = collect($data['other_images'] ?? [])->map(function ($image) use($storedProduct) {
                 return [
                     'product_id' => $storedProduct->id,
@@ -106,56 +119,57 @@ class ProductService
                 ];
             })->toArray();
 
+
             // remove variants when product update and select for remove
-            if (!empty($data['remove_variants'])) {
+            $removeVariants = json_decode($data['remove_variants'] ?? '[]', true);
 
-                // get IDs to remove
-                $ids = array_keys(array_filter($data['remove_variants'], fn($f) => $f == 1));
-
-                if (!empty($ids)) {
-
-                    // fetch all variants for product
-                    $variants = ProductVariant::whereIn('id', $ids)->get();
-
-                    // remove all images (no DB query)
-                    foreach ($variants as $variant) {
-                        if ($variant->image) {
-                            removeImage($variant->image);
-                        }
+            if (!empty($removeVariants)) {
+                ProductVariant::whereIn('id', $removeVariants)->each(function ($variant) {
+                    logger($variant);
+                    if ($variant->image) {
+                        removeImage($variant->image);
                     }
 
-                    // delete all variants for product
-                    ProductVariant::whereIn('id', $ids)->delete();
-                }
+                    $variant->delete();
+                });
+            }
+
+//            exit();
+
+
+            // remove variant images
+            $removeVariantsImage = json_decode($data['remove_variant_images'] ?? '[]', true);
+
+            if (!empty($removeVariantsImage)) {
+                ProductVariant::whereIn('id', $removeVariantsImage)->pluck('image')->filter()->each(function ($variant) {
+                    if($variant->image) {
+                        removeImage($variant->image);
+                    }
+                });
+
+                // Update DB once
+                ProductVariant::whereIn('id', $removeVariantsImage)
+                    ->update(['image' => null]);
             }
 
             // variant process
-            $variants = collect($data['variants'] ?? [])->map(function ($variant) use ($storedProduct) {
+            $variants = collect($data['variants'])->map(function ($variant) use ($storedProduct, $data) {
                 $variantImage = null;
 
-                // remove variant image
-                if (!empty($variant['remove_image']) && $variant['remove_image'] == 1) {
+                $image = !empty($data['variant_images'][$variant['image']]) ? $data['variant_images'][$variant['image']] : null;
 
-                    if (!empty($variant['id'])) {
-                        $old = ProductVariant::find($variant['id']);
-                        if ($old && $old->image) {
-                            removeImage($old->image);
-                        }
-                    }
-                }
-
-                if(!empty($variant['image'])) {
-                    $variantImage = is_string($variant['image']) ? $variant['image'] : getImageUrl($variant['image'], 'assets/images/uploaded-images/variant-images');
+                if($image) {
+                    $variantImage = is_string($image) ? $image : getImageUrl($image, 'assets/images/uploaded-images/variant-images');
                 }
 
                 $processedVariant = [
                     'id' => $variant['id'] ?? null,
                     'product_id' => $storedProduct->id,
-                    'vid' => $variant['vid'] ?? Str::uuid(),
+                    'vid' => $variant['vid'] ?? null,
                     'sku' => $variant['sku'] ?? null,
                     'variant_key' => $variant['variant_key'] ?? null,
-                    'buy_price' => $variant['buy_price'] ?? null,
-                    'selling_price' => $variant['selling_price'] ?? null,
+                    'buy_price' => $variant['buy_price'] ?: null,
+                    'selling_price' => $variant['selling_price'] ?: null,
                     'suggested_price' => $variant['suggested_price'] ?? null,
                     'image' => null
                 ];
@@ -167,7 +181,7 @@ class ProductService
                 return $processedVariant;
             })->toArray();
 
-            // Queue job
+            // Queue job for insert or update variants and other images
             ProcessProductImagesAndVariantsJob::dispatch($storedProduct->id, $otherImages, $variants);
 
             DB::commit();

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('shipping_charges', function (Blueprint $table) {
             $table->id();
             $table->string('city_name');
-            $table->string('charge');
+            $table->integer('charge');
             $table->tinyInteger('is_free')->default(0)->comment('0 - no, 1 - yes');
             $table->text('description')->nullable();
             $table->tinyInteger('status')->default(0)->comment('0 - inactive, 1 - active');

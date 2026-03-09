@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+    // admin login
     public function index(LoginRequest $request): RedirectResponse
     {
         $user = User::firstWhere('email', $request->email);
@@ -27,9 +28,26 @@ class LoginController extends Controller
         return back()->with('credentialError', 'Credentials do not match in our records');
     }
 
+    // user login
+    /**
+     * @throws \Throwable
+     */
     public function login(LoginRequest $request, AuthService $authService): JsonResponse
     {
-        return $authService->login($request->validated());
+        $response = $authService->login($request->validated());
+
+        if(empty($response['payload'])) {
+            return response()->json([
+                'status' => false,
+                'message' => "Credential didn't match in our records",
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successfully.',
+            'data' => $response['payload']
+        ])->cookie('refresh_token', $response['refresh_token'], 60 * 24 * 7, '/', null, app()->environment('production'), true, false, 'lax');
     }
 
     public function refreshToken(Request $request): JsonResponse
@@ -38,7 +56,7 @@ class LoginController extends Controller
             $cookieToken = $request->cookie('refresh_token');
 
             if (! $cookieToken) {
-                return response()->json(['message' => 'No refresh token provided'], 401);
+                return response()->json(['message' => 'No refresh token found'], 401);
             }
 
             // retrieve current user for refresh old token

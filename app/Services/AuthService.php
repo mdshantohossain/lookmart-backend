@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use function Laravel\Prompts\error;
 
 class AuthService
 {
@@ -29,27 +30,33 @@ class AuthService
      *      city?: string,
      *      state?: string,
      *      zipcode?: string} $data
-     * @return JsonResponse
+     * @return array
+     * @throws \Throwable
      */
-    public function login(array $data): JsonResponse
+    public function login(array $data): array
     {
         try {
             $user = User::where('email', $data['email'])
-                    ->with('addresses')
-                    ->withCount('orders')
-                    ->first();
+                ->with('addresses')
+                ->withCount('orders')
+                ->first();
 
             if (!$user || !Hash::check($data['password'], $user->password)) {
-                return response()->json([
+                return [
                     'status' => false,
-                    'message' => "Credential didn't match in our records",
-                ], 400);
+                    'message' => 'Invalid credentials'
+                ];
+            }
+
+            // update phone if exists
+            if(!empty($data['phone'])){
+                $user->update(['phone' => $data['phone']]);
             }
 
             // auth access token
             $accessToken  = $user->createToken('auth_token');
 
-            // refresh token access token to refresh old validate old token
+            // refresh token access token to refresh old access token
             $refreshToken = bin2hex(random_bytes(40));
 
             RefreshAccessToken::create([
@@ -59,35 +66,22 @@ class AuthService
                 'expires_in' => now()->addDays(7),
             ]);
 
-            // create address this will fire when user sign in or signup to checkout
-
+            // create address this will fire when user sign in or signup from checkout
             if(isset($data['street_address'])) {
                 $this->createAddress($data, $user->id);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successfully.',
-                'data' => [
+            return [
+                'payload' => [
                     'token' => $accessToken->plainTextToken,
                     'user' => $user,
-                ]
-            ])->cookie('refresh_token',
-                $refreshToken,
-                60 * 24 * 7,
-                '/',
-                null,
-                app()->environment('production'), // secure in prod
-                true,                              // httpOnly
-                false,
-                'lax');
+                ],
+                'refresh_token' => $refreshToken,
+            ];
 
         } catch (\Throwable $e) {
-            report($e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            report($e);
+            throw $e;
         }
     }
 
@@ -106,26 +100,19 @@ class AuthService
      *     zipcode?: string
      * } $data
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return User
+     * @throws \Throwable
      */
-    public function register(array $data): JsonResponse
+    public function register(array $data): User
     {
         try {
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'] ?? null,
-                'country' => $data['country'] ?? null,
                 'password' => bcrypt($data['password']),
                 'role' => 'user'
             ]);
-
-            if (! $user) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'An unexpected error occurred. Please try again later.',
-                ], 500);
-            }
 
             if(isset($data['street_address'])) {
                 $this->createAddress($data, $user->id);
@@ -133,18 +120,10 @@ class AuthService
 
             $this->createOrSendTokenToEmail($user);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful.'
-            ], 201);
+            return $user;
         } catch (\Throwable $e) {
             report($e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => app()->environment('local')
-                    ? $e->getMessage()
-                    : 'An unexpected error occurred. Please try again later.',
-            ], 500);
+            throw $e;
         }
     }
 
@@ -235,7 +214,7 @@ class AuthService
             if (! $record) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid or expired token. Please check to login or register again.',
+                    'message' => 'Invalid or expired token. Please register again.',
                 ], 400);
             }
 
@@ -297,8 +276,8 @@ class AuthService
     {
         try {
             $record = DB::table('password_reset_tokens')
-                        ->where('token', $data['token'])
-                        ->first();
+                ->where('token', $data['token'])
+                ->first();
 
             if(! $record) {
                 return response()->json([
@@ -311,8 +290,8 @@ class AuthService
 
             if(! $user) {
                 return response()->json([
-                  'success' => false,
-                  'message' => "User not requested for forgot password."
+                    'success' => false,
+                    'message' => "User not requested for forgot password."
                 ], 400);
             }
 

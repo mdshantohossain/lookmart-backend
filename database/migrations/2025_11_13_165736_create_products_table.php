@@ -46,6 +46,7 @@ return new class extends Migration
             $table->boolean('is_free_delivery')->default(0)->comment('0: false, 1: true');
             $table->tinyInteger('status')->comment('0: Published, 1: Unpublished');
             $table->tinyInteger('product_owner')->default(0)->comment('0: own, 1: cj dropshopping, 2: ali express');
+            $table->tinyInteger('is_export')->nullable()->comment('0: false, 1: true');
             $table->text('slug')->unique()->index();
             $table->timestamps();
         });
