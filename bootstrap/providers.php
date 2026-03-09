@@ -9,7 +9,7 @@ $providers = [
     Spatie\Permission\PermissionServiceProvider::class,
 ];
 
-if($this->app->environment('local')){
+if(app()->environment('local')){
     $providers[] = Barryvdh\Debugbar\ServiceProvider::class;
 }
 
