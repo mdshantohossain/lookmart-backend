@@ -1,0 +1,19 @@
+.tag-container {
+    min-height: 42px;
+}
+.tag-item {
+    animation: slideIn 0.2s ease-out;
+}
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+.tag-input-field {
+    outline: none !important;
+}

@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/lookmart/admin.lookmartbd.com
+    - /usr/local/bin/php $DEPLOYPATH/artisan down || true
+    - cd $DEPLOYPATH
+    - /usr/local/bin/composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+    - /usr/local/bin/php $DEPLOYPATH/artisan migrate --force
+    - /usr/local/bin/php $DEPLOYPATH/artisan optimize:clear
+    - /usr/local/bin/php $DEPLOYPATH/artisan up
